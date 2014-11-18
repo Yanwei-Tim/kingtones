@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<bean id="loginBS" class="com.kingtone.jw.service.bs.login.impl.LoginBSImpl">
+		<property name="loginDAO" ref="loginDAO"/>
+	</bean>
+	
+	<bean id="apkCheckBS" class="com.kingtone.jw.service.bs.apk.impl.ApkCheckBSImpl">
+		<property name="logDAO" ref="logDAO"/>
+	</bean>
+	
+	<!-- add by yangzm for face -->
+	<bean id="faceService" class="com.kingtone.jw.service.face.service.FaceServiceImp">
+	</bean>
+	
+	<bean id="lawService" class="com.kingtone.jw.service.law.LawServiceImpl">
+		<property name="dataSource" ref="multiDS"/>
+	</bean>
+</beans>

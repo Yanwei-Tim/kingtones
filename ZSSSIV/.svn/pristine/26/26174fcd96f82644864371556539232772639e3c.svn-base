@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<!-- 配置所有ORG相关的Dao -->
+	<!--bean id="accountDAO" class="com.kingtone.jw.platform.dao.impl.AccountDAOImpl" parent="platformDaoProxy" />
+	<bean id="privilegeDAO" class="com.kingtone.jw.platform.dao.impl.PrivilegeDAOImpl" parent="platformDaoProxy" />
+	<bean id="resourceDAO" class="com.kingtone.jw.platform.dao.impl.ResourceDAOImpl" parent="platformDaoProxy" />
+	<bean id="roleDAO" class="com.kingtone.jw.platform.dao.impl.RoleDAOImpl" parent="platformDaoProxy" />
+	<bean id="unitDAO" class="com.kingtone.jw.platform.dao.impl.UnitDAOImpl" parent="platformDaoProxy" />
+	<bean id="userDAO" class="com.kingtone.jw.platform.dao.impl.UserDAOImpl" parent="platformDaoProxy" />
+	
+	<bean id="orgUtils" class="com.kingtone.jw.platform.util.OrgUtils" factory-method="getInstance">
+		<property name="accountDAO" ref="accountDAO" />
+		<property name="userDAO" ref="userDAO" />
+		<property name="unitDAO" ref="unitDAO" />
+		<property name="resourceDAO" ref="resourceDAO" />
+		<property name="privilegeDAO" ref="privilegeDAO" />
+		<property name="roleDAO" ref="roleDAO" />
+		<property name="adminRoleId" value="admin" />
+	</bean-->
+	
+	<!--JQ警情 yulipeng-->
+	<bean id="psDAO" class="com.kingtone.jw.platform.dao.impl.PSDAOImpl" parent="platformOrmDaoProxy" />	
+	<bean id="psUserDAO" class="com.kingtone.jw.platform.dao.impl.PsUserDaoImpl" parent="platformOrmDaoProxy"/>
+	<bean id="psUCDAO" class="com.kingtone.jw.platform.dao.impl.PsUserCountDaoImpl" parent="platformOrmDaoProxy"/>
+	<bean id="psUnitCDAO" class="com.kingtone.jw.platform.dao.impl.PsUnitCountDaoImpl" parent="platformOrmDaoProxy"/>
+		 
+	<bean id="codeListDAO" class="com.kingtone.jw.platform.dao.impl.CodeListDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="unitDAO" class="com.kingtone.jw.platform.dao.impl.UnitDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="userDAO" class="com.kingtone.jw.platform.dao.impl.UserDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="menuDAO" class="com.kingtone.jw.platform.dao.impl.MenuDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="accountDAO" class="com.kingtone.jw.platform.dao.impl.AccountDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="resourceDAO" class="com.kingtone.jw.platform.dao.impl.ResourceDAOImpl" parent="platformOrmDaoProxy" />
+	<bean id="roleDAO" class="com.kingtone.jw.platform.dao.impl.RoleDAOImpl" parent="platformOrmDaoProxy" />
+	<!--  <bean id="privilegeDAO_bak" class="com.kingtone.jw.platform.dao.impl.privilegeDAOImpl" parent="platformOrmDaoProxy" />-->
+    <bean id="privilegeDAO" class="com.kingtone.jw.platform.dao.impl.PrivilegeDAOImpl" parent="platformOrmDaoProxy" />
+  	<bean id="buttonDAO" class="com.kingtone.jw.platform.dao.impl.ButtonDAOImpl" parent="platformOrmDaoProxy"/>
+  	 	
+    <bean id="orgUtils" class="com.kingtone.jw.platform.util.OrgUtils" factory-method="getInstance">		
+		<property name="accountDAO" ref="accountDAO" />
+		<property name="userDAO" ref="userDAO" />
+		<property name="unitDAO" ref="unitDAO" />
+		<property name="resourceDAO" ref="resourceDAO" />
+		<!--  <property name="privilegeDAO" ref="privilegeDAO_bak" />-->
+		<property name="roleDAO" ref="roleDAO" />
+		<property name="adminRoleId" value="admin" />
+		<property name="buttonDAO" ref="buttonDAO"></property>
+	</bean> 
+
+
+</beans>

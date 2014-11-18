@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+ 	<sqlMap resource="com/kingtone/jw/platform/platform.xml"/>
+	<sqlMap resource="com/kingtone/jw/platform/userpn.xml"/>
+ 	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/common/sjcj.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/common/tztg.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/common/update.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/service/service.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/xajw/jwlog.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/xajw/jwuser.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/xajw/jwrole.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/manage/address.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/manage/law.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/manage/lawNew.xml"/>
+	<!-- add hanliqiang start-->
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/xajw/jwgps.xml"/>
+	<sqlMap resource="com/kingtone/jw/ibatis/maps/biz/xajw/jwvideo.xml"/>
+	<!-- add hanliqiang end-->
+ 	<!-- <sqlMap resource="com/kingtone/jw/ibatis/maps/biz/service/biz.xml"/> -->
+	
+</sqlMapConfig>

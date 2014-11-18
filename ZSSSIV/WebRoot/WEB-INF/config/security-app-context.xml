@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- 删除 ssiFilterInvocationInterceptor 不进行URL权限验证 -->
+	<bean id="SSISecurityFilterChainProxy"
+		class="org.acegisecurity.util.FilterChainProxy">
+		<property name="filterInvocationDefinitionSource">
+			 <value><![CDATA[
+            CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+            PATTERN_TYPE_APACHE_ANT
+            /**=httpSessionContextIntegrationFilter,logoutFilter,anonymousProcessingFilter,authenticationProcessingFilter,exceptionTranslationFilter,securityContextHolderAwareRequestFilter,ssiFilterInvocationInterceptor
+        ]]></value>
+		</property>
+	</bean>
+		
+	<bean id="httpSessionContextIntegrationFilter" class="org.acegisecurity.context.HttpSessionContextIntegrationFilter">
+		<property name="allowSessionCreation" value="false" />
+	</bean>
+	
+	<bean id="securityContextHolderAwareRequestFilter" class="org.acegisecurity.wrapper.SecurityContextHolderAwareRequestFilter">
+	</bean>
+	
+	<bean id="anonymousProcessingFilter" class="org.acegisecurity.providers.anonymous.AnonymousProcessingFilter">
+		<property name="key" value="anonymousUser" />
+		<property name="userAttribute" value="adminRole,sysUserRole" /><!-- ANONYMOUS_USER，匿名用户，对未注册权限的资源 都可以访问；所以要将其去除-->
+	</bean>
+	
+	<!-- 过滤器2 -->
+	<bean id="logoutFilter" class="org.acegisecurity.ui.logout.LogoutFilter">
+		<constructor-arg value="/platform/login!logout.action" /><!-- 登出后重定向到该页面 -->
+		<constructor-arg>
+			<list>
+				<bean class="org.acegisecurity.ui.logout.SecurityContextLogoutHandler" />
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<!-- 过滤器3 关键-->
+	<bean id="authenticationProcessingFilter" class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationFailureUrl" value="/platform/login!error.action?type=0" /><!-- 登录失败URL -->
+		<property name="defaultTargetUrl" value="/platform/login!success.action" /> <!-- 登录成功URL -->
+		<property name="filterProcessesUrl" value="/platform/j_acegi_security_check" /><!-- 登录验证URL -->
+	</bean>
+	
+	<!-- 认证管理器 重要 -->
+	<bean id="sessionRegistry" class="org.acegisecurity.concurrent.SessionRegistryImpl" />
+	<bean id="authenticationManager" class="org.acegisecurity.providers.ProviderManager">
+		<property name="providers">
+			<list>
+				<ref local="anonymousAuthenticationProvider" />
+				<ref local="daoAuthenticationProvider" />
+			</list>
+		</property>
+		<property name="sessionController">
+			<bean class="org.acegisecurity.concurrent.ConcurrentSessionControllerImpl">
+				<property name="maximumSessions" value="1" />
+				<property name="exceptionIfMaximumExceeded" value="false" />
+				<property name="sessionRegistry">
+					<ref local="sessionRegistry" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<bean id="anonymousAuthenticationProvider"
+		class="org.acegisecurity.providers.anonymous.AnonymousAuthenticationProvider">
+		<property name="key" value="anonymousUser" />
+	</bean>
+
+	<bean id="daoAuthenticationProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+		<property name="userDetailsService">
+			<ref local="ssiUserDetailsService" />
+		</property>
+		<property name="passwordEncoder" ref="md5PasswordEncoder"  />  
+	</bean>
+	<bean id="md5PasswordEncoder" class="com.kingtone.ssi.security.Md5PasswordEncoder"/> 
+	<bean id="security.accountDAO" lazy-init="true" class="com.kingtone.jw.platform.dao.impl.AccountDAOImpl"
+		parent="platformOrmDaoProxy">
+	</bean>
+	<bean id="security.roleDAO" lazy-init="true" class="com.kingtone.jw.platform.dao.impl.RoleDAOImpl"
+		parent="platformOrmDaoProxy">
+	</bean>
+	<bean id="security.userDAO" lazy-init="true" class="com.kingtone.jw.platform.dao.impl.UserDAOImpl"
+		parent="platformOrmDaoProxy">
+	</bean>
+	<bean id="ssiUserDetailsService" class="com.kingtone.ssi.security.SSIUserDetailService">
+		<property name="accountDAO">
+			<ref bean="security.accountDAO" />
+		</property>
+		<property name="roleDAO">
+			<ref bean="security.roleDAO" />
+		</property>
+		<property name="userDAO">
+			<ref bean="security.userDAO" />
+		</property>
+	</bean>
+
+	<!-- 拦截器1 -->
+	<bean id="ssiFilterInvocationInterceptor" class="com.kingtone.ssi.security.SSIFilterSecurityInterceptor">
+		<property name="authenticationManager">
+			<ref local="authenticationManager" />
+		</property>
+		<property name="accessDecisionManager">
+			<ref local="httpRequestAccessDecisionManager" />
+		</property>
+		
+	</bean>
+	<bean id="httpRequestAccessDecisionManager" class="org.acegisecurity.vote.AffirmativeBased">
+		<property name="decisionVoters">
+			<ref local="roleVoter" />
+		</property>
+	</bean>
+	<bean id="roleVoter" class="org.acegisecurity.vote.RoleVoter">
+		<property name="rolePrefix">
+			<value></value>
+		</property>
+	</bean>
+
+	<!-- 过滤器7 -->
+	<bean id="exceptionTranslationFilter" class="org.acegisecurity.ui.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint">
+			<bean class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+				<property name="loginFormUrl" value="/platform/login_point.action" /> <!--登录页面： 当访问URL资源时，若未登录则跳转至次 -->
+				<property name="forceHttps" value="false" />
+			</bean>
+		</property>
+		<property name="accessDeniedHandler">
+			<bean class="org.acegisecurity.ui.AccessDeniedHandlerImpl">
+				<property name="errorPage" value="/denied.jsp" />  <!-- 无权访问提示页面 -->
+			</bean>
+		</property>
+	</bean>
+	
+<bean id="authenticationLoggerListener" class="org.acegisecurity.event.authentication.LoggerListener" />
+</beans>

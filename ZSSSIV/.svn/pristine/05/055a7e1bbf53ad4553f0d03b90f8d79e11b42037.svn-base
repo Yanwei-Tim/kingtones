@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	
+	<bean id="addressBS" class="com.kingtone.jw.biz.manage.bs.impl.AddressBSImpl" scope="prototype">
+		<property name="addressDAO" ref="addressDAO"/>
+	</bean>
+	<bean id="lawBS" class="com.kingtone.jw.biz.manage.bs.impl.LawBSImpl" scope="prototype">
+		<!--<property name="jwUserDAO" ref="jwUserDAO"/>
+		--><property name="lawDAO" ref="lawDAO"></property>		
+	</bean>	
+	<bean id="lawDirectoryBS" class="com.kingtone.jw.biz.manage.bs.impl.LawDirectoryBSImpl" scope="prototype">
+		<property name="lawDirectoryDAO" ref="lawDirectoryDAO"/>
+	</bean>
+</beans>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="lawDirectory" type="com.kingtone.jw.biz.manage.domain.LawDirectory" />
+	<typeAlias alias="lawContent" type="com.kingtone.jw.biz.manage.domain.LawContent" />
+		
+	<select id="findLawDirectoryList" parameterClass="lawDirectory" resultClass="lawDirectory">
+		SELECT ID,CODE,NAME,CREATED_TIME,SORT,PARENT_ID FROM JW_LAW_DIRECTORY WHERE 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="code">
+				CODE LIKE '%'||#CODE#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="name">
+				NAME LIKE '%'||#NAME#||'%'
+			</isNotEmpty>
+			<isLessEqual prepend="and" compareValue="0" property="parentId">
+				(PARENT_ID = 0 OR PARENT_ID IS NULL)
+			</isLessEqual>
+			<isGreaterThan prepend="and" compareValue="0" property="parentId">
+				PARENT_ID = #parentId#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY SORT,CREATED_TIME DESC
+	</select>
+	
+	<select id="findLawContent" parameterClass="int" resultClass="lawContent">
+		select id,content,created_time createdTime from jwt_conf.jw_law_content where directory_id=#directoryId#		
+	</select>
+	
+	<insert id="addLawDirectory" parameterClass="lawDirectory">
+		<![CDATA[
+		insert into jwt_conf.jw_law_directory values(
+		GET_LAW_ID.Nextval,#code#,#name#,#createdTime#,GET_LAW_ID.Nextval,decode(#parentId#,0,NULL,#parentId#))
+		]]>
+	</insert>
+	
+	<select id="getLawDirectorybyId" parameterClass="int" resultClass="lawDirectory">
+		select id,code,name from jwt_conf.jw_law_directory where id=#id#
+	</select>
+	
+	<update id="updateLawDirectory" parameterClass="lawDirectory">
+		update jwt_conf.jw_law_directory set name=#name#, code=#code# where id=#id#
+	</update>
+	
+	<select id="getLawContentCount" parameterClass="int" resultClass="int">
+		select count(*) from jwt_conf.jw_law_content where directory_id=#id#
+	</select>
+	
+	<insert id="addLawContent" parameterClass="lawContent">
+		<![CDATA[
+		insert into jwt_conf.jw_law_content values(GET_LAW_ID.Nextval,#directoryId#,#content#,#createdTime#)
+		]]>
+	</insert>
+	
+	<select id="findLawContentbyId" parameterClass="int" resultClass="lawContent">
+		select b.name pName,a.content from jwt_conf.jw_law_content a,jwt_conf.jw_law_directory b where
+		 a.directory_id=b.id and a.directory_id=#id#
+	</select>
+	
+	<update id="updateLawContent" parameterClass="lawContent">
+		update jwt_conf.jw_law_content set content=#content# where directory_id=#directoryId#
+	</update>
+	
+	<delete id="deleteLawContent" parameterClass="int">
+		delete from jwt_conf.JW_LAW_CONTENT where directory_id=#id#
+	</delete>
+	
+	<select id="getLawDirectoryCount" parameterClass="int" resultClass="int">
+		select count(t1.id) from jwt_conf.JW_LAW_DIRECTORY t,jwt_conf.JW_LAW_DIRECTORY t1 
+		where t.id=t1.parent_id and t.id=#id#
+	</select>
+	
+	<delete id="deleteLawDirectory" parameterClass="int">
+		delete from jwt_conf.JW_LAW_DIRECTORY where id=#id#
+	</delete>
+</sqlMap>

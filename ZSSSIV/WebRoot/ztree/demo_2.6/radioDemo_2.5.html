@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+ <HEAD>
+  <TITLE> ZTREE DEMO </TITLE>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="demoStyle/demo.css" type="text/css">
+  <link rel="stylesheet" href="zTreeStyle/zTreeStyle.css" type="text/css">
+  <script type="text/javascript" src="jquery-1.4.2.js"></script>
+  <script type="text/javascript" src="jquery.ztree-2.6.js"></script>
+  <script type="text/javascript" src="asyncData/demoData.js"></script>
+  <SCRIPT LANGUAGE="JavaScript">
+  <!--
+	var zTree1;
+	var setting;
+
+		setting = {
+			checkable: true,
+			checkStyle: "radio",
+			checkRadioType: "level",
+			callback: {
+				change:	zTreeOnChange
+			}
+		};
+
+	$(document).ready(function(){
+		refreshTree();
+	});
+
+
+	function zTreeOnChange(event, treeId, treeNode) {
+		getCheckedNodesLength();
+	}
+	
+	function getRadioType() {
+		var level = $("#level").attr("checked")? "level":"";
+		var all = $("#all").attr("checked")? "all":"";
+		
+		return level + all;
+	}
+	
+	function refreshTree() {
+		setting.checkRadioType = getRadioType();
+		zTree1 = $("#treeDemo").zTree(setting, zNodes);
+		$("#checkRadioTypeCode").html(setting.checkRadioType);
+		getCheckedNodesLength();
+	}
+
+	function getCheckedNodesLength() {
+		var tmp = zTree1.getCheckedNodes(true);
+		$("#checkedNum").html(tmp.length);
+	}
+
+  //-->
+  </SCRIPT>
+ </HEAD>
+
+<BODY>
+<center class="headTitle">Radio&nbsp;&nbsp;演示</center>
+<TABLE border=0 width="700" class="tb1">
+	<TR>
+		<TD width=340px align=center valign=top>
+		<div class="zTreeDemoBackground">
+			<ul id="treeDemo" class="tree"></ul>
+		</div>		
+		</TD>
+	</TR>
+</TABLE>
+ </BODY>
+</HTML>

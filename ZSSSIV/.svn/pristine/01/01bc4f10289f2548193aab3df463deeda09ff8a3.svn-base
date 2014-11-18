@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	<!-- 手机终端功能模块 -->
+	<bean id="menuAC" class="com.kingtone.jw.platform.auth.MenuAC" scope="prototype">
+		<property name="menuBS" ref="menuBS"/>
+		
+	</bean>	
+	
+	<bean id="roleAC" class="com.kingtone.jw.platform.auth.RoleAC" scope="prototype">
+		<property name="roleBS" ref="roleBS"/>
+	</bean>	
+	
+	<bean id="buttonAC" class="com.kingtone.jw.platform.auth.ButtonAC" scope="prototype">
+		<property name="buttonBS" ref="buttonBS"/>
+	</bean>	
+</beans>

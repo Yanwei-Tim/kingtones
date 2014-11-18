@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<packages>
+	<package name="common">
+		<configuration-files>
+			/WEB-INF/config/dao-app-context.xml,
+			/WEB-INF/config/datasource-app-context.xml,
+			/WEB-INF/config/transaction-app-context.xml,
+			/WEB-INF/config/scheduler-app-context.xml, 
+			/WEB-INF/config/security-app-context.xml,
+		</configuration-files>
+	</package>
+	<package name="platform">
+		<configuration-files>
+			/WEB-INF/config/platform/login/action-app-context.xml,
+			/WEB-INF/config/platform/auth/action-app-context.xml,
+			/WEB-INF/config/platform/org/action-app-context.xml,
+			/WEB-INF/config/platform/org/bs-app-context.xml,
+			/WEB-INF/config/platform/org/dao-app-context.xml,
+			
+			<!-- Add by 韩立强   -->
+			/WEB-INF/config/platform/dpn/action-app-context.xml,
+			/WEB-INF/config/platform/dpn/bs-app-context.xml,
+			/WEB-INF/config/platform/dpn/dao-app-context.xml,
+			
+			/WEB-INF/config/platform/codelist/action-app-context.xml,
+			<!-- Add by 陈萧如 2012-01-04 start -->
+			/WEB-INF/config/platform/service/bs-app-context.xml,
+			<!-- Add by 陈萧如 2012-01-04 end -->
+			/WEB-INF/config/platform/service/dao-app-context.xml,
+		</configuration-files>
+	</package>
+	<package name="jingwu">
+		<configuration-files>
+			/WEB-INF/config/biz/common/action-app-context.xml,
+			/WEB-INF/config/biz/common/bs-app-context.xml,
+			/WEB-INF/config/biz/common/dao-app-context.xml,
+			/WEB-INF/config/biz/service/action-app-context.xml,
+			/WEB-INF/config/biz/service/bs-app-context.xml,
+			/WEB-INF/config/biz/service/dao-app-context.xml,
+			/WEB-INF/config/biz/xajw/action-app-context.xml,
+			/WEB-INF/config/biz/xajw/bs-app-context.xml,
+			/WEB-INF/config/biz/xajw/dao-app-context.xml,
+			/WEB-INF/config/biz/manage/action-app-context.xml,
+			/WEB-INF/config/biz/manage/bs-app-context.xml,
+			/WEB-INF/config/biz/manage/dao-app-context.xml,
+		</configuration-files>
+	</package>
+</packages>

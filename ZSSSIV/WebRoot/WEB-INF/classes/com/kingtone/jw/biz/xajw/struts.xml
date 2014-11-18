@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" 
+	"D:\projects\neusipo_v2.0\platform\struts-2.0.dtd">
+<struts>
+	<package name="xajw" extends="struts-default" namespace="/xajw">
+		<action name="jwLogAC" class="jwLogAC">
+		</action>
+		<action name="jwUserAC" class="jwUserAC">
+		<result name="success">/success.jsp</result>
+		<result name="error">/error.jsp</result>
+		
+		</action>
+		<action name="jwRoleAC" class="jwRoleAC">
+		</action>
+		<!-- add hanliqiang start-->
+		<action name="jwGpsConfigAC" class="jwGpsConfigAC">
+		<result name="map_now_show">/biz/xajw/jwmap_now_show.jsp</result>
+		<result name="map_ls_show">/biz/xajw/jwmap_ls_show.jsp</result>		
+		</action>
+		<action name="jwVideoAC" class="jwVideoAC"></action>
+		<!-- add hanliqiang end-->
+	</package>
+	
+	<!-- 定位调度管理 -->
+	<package name="gpsdw" extends="struts-default" namespace="/dw">
+		<action name="jwGpsManagerAC" class="jwGpsManagerAC">									
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>	
+		</action>
+		<action name="jwUserDisplayAC" class="jwUserDisplayAC">									
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>	
+		</action>
+	</package>
+</struts>

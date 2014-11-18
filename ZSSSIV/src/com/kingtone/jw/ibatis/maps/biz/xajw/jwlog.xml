@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="jwLog" type="com.kingtone.jw.biz.xajw.domain.JwLog" />
+	<typeAlias alias="jwLogUser" type="com.kingtone.jw.biz.xajw.domain.JwLogUser" />
+	<typeAlias alias="jwUser" type="com.kingtone.jw.biz.xajw.domain.JwUser" />
+	
+	<!--分页查找日志信息 -->
+	<select id="findJwLogList" parameterClass="jwLog"
+		resultClass="jwLog">
+		select t.id,u.account as user_id,t.biz_id,t.op_time,c.b_name as biz_name,u.name as user_name 
+		from jw_log t,jw_user u,business_config c 
+		where t.OP_STATUS is null
+   and  t.biz_id = c.b_id and t.user_id = u.account 
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				t.id = #id#
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="user_id">
+				t.user_id like '%'||#user_id#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="user_name">
+				u.name like '%'||#user_name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="biz_id">
+				t.biz_id like '%'||#biz_id#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="biz_name">
+				c.b_name like '%'||#biz_name#||'%'
+			</isNotEmpty>
+			
+		</dynamic>
+		order by t.op_time desc
+	</select>
+	<!--统计未使用用户信息 -->
+	<select id="getJwLog" parameterClass="String"
+		resultClass="jwLogUser">
+		$sql$
+		
+	</select>
+	<!--统计未使用用户信息 -->
+	<select id="findJwLogListCountQuery" parameterClass="String"
+		resultClass="int">
+		$sql$
+		
+	</select>
+	
+	<!--统计未使用用户信息 -->
+	<select id="findJwLogListCountUserQuery" parameterClass="String"
+		resultClass="int">
+		$sql$
+		
+	</select>
+	<!--统计未使用用户信息 -->
+	<select id="findJwLogListCountNuserQuery" parameterClass="String"
+		resultClass="int">
+		$sql$
+		
+	</select>
+	<!--统计某个用户信息 -->
+	<select id="getJwLogUser1" parameterClass="String"
+		resultClass="jwLogUser">
+		$sql$
+	</select>
+	
+	<select id="getJwLogUser2" parameterClass="String"
+		resultClass="jwLogUser">
+		$sql$
+		
+	</select>
+	
+	<!--查找日志总数 -->
+	<select id="findJwLogListCount" parameterClass="jwLog"
+		resultClass="int">
+		select count(*)from jw_log t,jw_user u,business_config c 
+		where t.OP_STATUS is null
+    and t.biz_id = c.b_id and t.user_id = u.account
+		<dynamic>
+			<isNotEmpty prepend="and" property="id">
+				t.id = #id#
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="user_id">
+				t.user_id like '%'||#user_id#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="user_name">
+				u.name like '%'||#user_name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="biz_id">
+				t.biz_id like '%'||#biz_id#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="biz_name">
+				c.b_name like '%'||#biz_name#||'%'
+			</isNotEmpty>
+			
+		</dynamic>
+	</select>
+	<!--删除日志信息 -->
+	<delete id="delJwLog" parameterClass="String">
+		delete from jw_log where id= #id#
+	</delete>
+	
+	
+	
+</sqlMap>

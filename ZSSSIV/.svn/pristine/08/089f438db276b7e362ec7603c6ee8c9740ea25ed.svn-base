@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<!--JQyulipeng-->
+	<bean id="psAC" class="com.kingtone.jw.platform.org.PSAC" scope="prototype">
+		<property name="psBS" ref="psBS"/>
+	</bean>	
+	<bean id="psUserAC" class="com.kingtone.jw.platform.org.PsUserAC" scope="prototype">
+		<property name="psUserBS" ref="psUserBS"/>
+	</bean>	
+	<bean id="psUCAC" class="com.kingtone.jw.platform.org.PsUserCountAC" scope="prototype">
+		<property name="psUCBS" ref="psUCBS"/>
+	</bean>	
+	<bean id="psUnitCAC" class="com.kingtone.jw.platform.org.PsUnitCountAC" scope="prototype">
+		<property name="psUnitCBS" ref="psUnitCBS"/>
+	</bean>
+	
+	<bean id="unitAC" class="com.kingtone.jw.platform.org.UnitAC" scope="prototype">
+		<property name="unitBS" ref="unitBS"/>
+		<property name="userBS" ref="userBS"/>
+		<property name="jwUserBS" ref="jwUserBS"/>
+	</bean>			
+	<bean id="userAC" class="com.kingtone.jw.platform.org.UserAC">
+		<property name="userBS" ref="userBS"/>
+		<property name="unitBS" ref="unitBS"/>
+	</bean>
+	
+	<bean id="logAC" class="com.kingtone.jw.platform.org.LogAC" scope="prototype">
+		<property name="unitBS" ref="unitBS"></property>
+	</bean>
+</beans>

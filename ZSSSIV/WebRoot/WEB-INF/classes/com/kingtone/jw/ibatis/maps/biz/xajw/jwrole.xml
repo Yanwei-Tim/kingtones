@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="jwRole" type="com.kingtone.jw.biz.xajw.domain.JwRole" />
+	<typeAlias alias="jwMRoleBiz" type="com.kingtone.jw.biz.xajw.domain.JwMRoleBiz" />
+	<typeAlias alias="jwMRoleRes" type="com.kingtone.jw.biz.xajw.domain.JwMRoleRes" />	
+	<typeAlias alias="menu" type="com.kingtone.jw.platform.domain.Menu" />	
+		
+	<!--添加终端角色信息 -->
+	<select id="findJwRoleList" parameterClass="jwRole"
+		resultClass="jwRole">
+		select t.* from jw_role t
+	</select>	
+	<!--添加用户信息 -->
+	<insert id="addJwRole" parameterClass="JwRole">
+		<![CDATA[
+	 insert into jw_role (role_id,role_name,role_desc,change_date)
+     values (#role_id#,#role_name#,#role_desc#,#change_date#)
+		]]>
+	</insert>
+	<!--修改终端角色信息 -->
+	<update id="editJwRole" parameterClass="jwRole">
+		update jw_role set role_name =#role_name#, role_desc= #role_desc#,change_date=#change_date#
+		where role_id= #role_id#
+	</update>
+		<!--修改终端角色信息 -->
+	<update id="editJwRoleCDate" parameterClass="jwRole">
+		update jw_role set change_date=#change_date#
+		where role_id= #role_id#
+	</update>
+		<!--根据业务更新角色的更新时间 -->
+	<update id="editJwRoleCDateByBiz" parameterClass="jwRole">
+		update jw_role set jw_role.change_date=#change_date#
+		where 
+		role_id in (select role_id from jw_m_role_biz where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="biz_id">
+				biz_id=#biz_id#
+			</isNotEmpty>
+		</dynamic>		  
+		)
+	</update>
+	
+	<!--删除终端角色信息 -->
+	<delete id="delJwRole" parameterClass="String">
+		delete from jw_role where role_id= #role_id#
+	</delete>	
+	<!-- 根据父节点和角色ID来查BIZ树 -->
+	<select id="findBizListByParentAndRoleId" parameterClass="jwMRoleBiz"
+		resultClass="menu">
+		select t.b_id menu_id,t.b_name name,t.father_id parent_id,
+case when (select count(1) from business_config tt where tt.father_id=t.b_id)>0 then 0 else 1 end leaf,
+  case when (select count(1) from jw_m_role_biz j where j.role_id=#role_id# and j.biz_id=t.b_id) >0 then 1 else 0 end checked
+from business_config t where t.father_id=#biz_id#
+	</select>
+	<!-- 根据父节点和角色ID来查RES树 -->
+	<select id="findResListByBizAndRoleId" parameterClass="jwMRoleRes"
+		resultClass="menu">
+		select c.w_id menu_id,c.name name,c.b_id parent_id,t.b_name description,
+case when (select count(1) from business_config tt where tt.father_id=t.b_id)>0 then 0 else 1 end leaf,
+  case when (select count(1) from jw_m_role_res j where j.role_id=#role_id# and j.res_id=c.w_id  and j.biz_id=t.b_id) >0 then 1 else 0 end checked
+from business_config t,business_res_config c where t.b_id=#res_id# and c.b_id=t.b_id order by c.w_id
+	</select>
+		<!--添加角色和业务模块关联信息 -->
+	<insert id="addJwMRoleBiz" parameterClass="jwMRoleBiz">
+		<![CDATA[
+	 insert into jw_m_role_biz (role_id,biz_id)
+     values (#role_id#,#biz_id#)
+		]]>
+	</insert>	
+		<!--添加角色和业务组件关联信息 -->
+	<insert id="addJwMRoleRes" parameterClass="jwMRoleRes">
+		<![CDATA[
+	 insert into jw_m_role_res (role_id,res_id,biz_id)
+     values (#role_id#,#res_id#,#biz_id#)
+		]]>
+	</insert>
+		<!--删除角色和业务模块关联信息 -->
+	<delete id="delJwMRoleBiz" parameterClass="jwMRoleBiz">
+		delete from jw_m_role_biz where role_id= #role_id# 
+		<dynamic>
+			<isNotEmpty prepend="and" property="biz_id">
+				biz_id=#biz_id#
+			</isNotEmpty>
+		</dynamic>
+	</delete>
+		<!--删除角色和业务组件关联信息 -->
+	<delete id="delJwMRoleRes" parameterClass="jwMRoleRes">
+		delete from jw_m_role_res where role_id= #role_id# 
+		<dynamic>
+			<isNotEmpty prepend="and" property="biz_id">
+				biz_id=#biz_id#
+			</isNotEmpty>
+		</dynamic>
+		<dynamic>
+			<isNotEmpty prepend="and" property="res_id">
+				res_id=#res_id#
+			</isNotEmpty>
+		</dynamic>
+	</delete>
+			<!--删除角色和业务模块关联信息 by bid-->
+	<delete id="delJwMRoleBizByBid" parameterClass="String">
+		delete from jw_m_role_biz where biz_id=#biz_id#
+	</delete>
+			<!--删除角色和业务组件关联信息 by rid-->
+	<delete id="delJwMRoleResByRidBid" parameterClass="jwMRoleRes">
+		delete from jw_m_role_res where res_id=#res_id# and biz_id=#biz_id#
+	</delete>
+				<!--删除角色和业务组件关联信息 by bid-->
+	<delete id="delJwMRoleResByBid" parameterClass="String">
+		delete from jw_m_role_res where biz_id=#biz_id#
+	</delete>
+</sqlMap>

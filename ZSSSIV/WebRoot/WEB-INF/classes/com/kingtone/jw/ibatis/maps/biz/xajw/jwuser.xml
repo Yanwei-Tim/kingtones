@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="jwUser"
+		type="com.kingtone.jw.biz.xajw.domain.JwUser" />
+	<typeAlias alias="jwJz" type="com.kingtone.jw.biz.xajw.domain.JwJz" />
+	
+	
+	<!--导出用户信息 
+	<select id="getAllJwUser" resultClass="jwUser">
+		select t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,t.jz,t.xzqh,t.account,t.xb,t.description
+		 from jw_user t where 1=1
+	</select>-->
+	<select id="getAllJwUser"  parameterClass="jwUser" resultClass="jwUser">
+		select t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,t.jz,t.xzqh,t.account,t.xb,t.description
+		 from jw_user t where 1=1
+		 <dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				(t.xzqh in ($xzqh$))
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--导出单位用户信息 -->
+	<select id="getUnitJwUser" parameterClass="jwUser" resultClass="jwUser">
+		select t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,t.jz,t.xzqh,t.account,t.xb,t.description
+		 from jw_user t where 1=1
+		 <dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				(t.xzqh in ($xzqh$))
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!--根据account查找用户总数 -->
+	<select id="findByJwUserAccunt" parameterClass="String"
+		resultClass="int">
+		select count(*)from jw_user t where t.account=#account#
+	</select>
+	
+	<!--分页查找用户信息 -->
+	<select id="findJwOnlineUserList" parameterClass="jwUser"
+		resultClass="jwUser">
+		<![CDATA[select t.id,t.name,t.loadtime,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,t.jz as jzname,t.xzqh,t.account,t.xb,t.description
+     from jw_user t  where ((sysdate -t.loadtime)*24*60*60)<30]]>
+		 
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="account">
+				t.account like '%'||#account#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjhm">
+				t.sjhm like '%'||#sjhm#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjcm">
+				t.sjcm like '%'||#sjcm#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="jz">
+				t.jz like '%'||#jz#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+			
+		</dynamic>
+		order by t.id desc
+	</select>
+	
+	<!--查找用户总数 -->
+	<select id="findJwOnlineUserListCount" parameterClass="jwUser"
+		resultClass="int">
+		<![CDATA[select count(*) from jw_user t  where ((sysdate -t.loadtime)*24*60*60)<30]]>
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="account">
+				t.account like '%'||#account#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjhm">
+				t.sjhm like '%'||#sjhm#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjcm">
+				t.sjcm like '%'||#sjcm#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="jz">
+				t.jz like '%'||#jz#||'%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+			
+		</dynamic>
+		order by t.id desc
+	</select>
+	
+	<!--添加用户信息 -->
+
+	<insert id="importJwUser" parameterClass="JwUser">
+
+		<![CDATA[
+	
+    insert into jw_user (id,name,psw,sjhm,sjcm,jmkh,jz,xzqh,account,xb,description,islocked)
+     values (#id#,#name#,#psw#,#sjhm#,#sjcm#,#jmkh#,#jz#,#xzqh#,#account#,#xb#,#description#,#islocked#)
+
+		]]>
+	</insert>
+	<!--分页查找用户信息 -->
+	<select id="findJwUserListStruct" parameterClass="jwUser"
+		resultClass="jwUser">
+		select distinct t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,decode(getJZName(t.jz),null,'未知',getJZName(t.jz))  as
+		jzname,t.xzqh,t.account,t.xb,t.islocked,t.description ,decode(j.state,null,'2',j.state) as state 
+		from jw_user t left join jw_gps_config j on j.userid=t.id where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				(t.xzqh in ($xzqh$))
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="account">
+				t.account like '%'||#account#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjhm">
+				t.sjhm like '%'||#sjhm#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjcm">
+				t.sjcm like '%'||#sjcm#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="jz">
+				t.jz like '%'||GETJZID(#jz#)||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+		order by t.id desc
+	</select>
+	<select id="findJwUserList" parameterClass="jwUser"
+		resultClass="jwUser">
+		<!-- Modify by 陈萧如（增加 t.islocked） start-->
+		<!-- decode(j.state,null,'2',j.state) as state  以及 left join jw_gps_config j on j.userid=t.id  add by hanliqiang-->
+		select distinct t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,decode(getJZName(t.jz),null,'未知',getJZName(t.jz))  as
+		jzname,t.xzqh,t.account,t.xb,t.islocked,t.description ,decode(j.state,null,'2',j.state) as state 
+		from jw_user t left join jw_gps_config j on j.userid=t.id where 1=1
+		<!-- Modify by 陈萧如（增加 t.islocked） end-->
+		<dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh = #xzqh#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="account">
+				t.account like '%'||#account#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjhm">
+				t.sjhm like '%'||#sjhm#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjcm">
+				t.sjcm like '%'||#sjcm#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="jz">
+				t.jz like '%'||GETJZID(#jz#)||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+		order by t.id desc
+	</select>
+	<!--分页查找警种信息 -->
+	<select id="findJwJzList" parameterClass="jwJz"
+		resultClass="jwJz">
+		select t.id,t.name,t.description from jw_jz t where 1=1
+
+		order by t.id asc
+	</select>
+
+	<!--查找用户总数 -->
+	<select id="findJwUserListCount" parameterClass="jwUser"
+		resultClass="int">
+		select count(*)from jw_user t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh=#xzqh#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="account">
+				t.account like '%'||#account#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjhm">
+				t.sjhm like '%'||#sjhm#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sjcm">
+				t.sjcm like '%'||#sjcm#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="jz">
+				t.jz like '%'||#jz#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+		order by t.id desc
+	</select>
+	<!--查找警种总数 -->
+	<select id="findJwJzListCount" parameterClass="jwJz"
+		resultClass="int">
+		select count(*)from jw_jz t where 1=1
+
+		order by t.id desc
+	</select>
+	<!--查找警种总数 -->
+	<select id="findUserByAccount" parameterClass="String"
+		resultClass="int">
+		select count(*)from jw_user t where t.account=#account#
+	</select>
+	<!--查找警种总数 -->
+	<select id="findJwUserByJwUser" parameterClass="jwUser"
+		resultClass="int">
+		select count(*)from jw_user t where 1=1 and t.account=#account#
+		and t.id !=#id#
+	</select>
+	
+	<!-- 根据sjcm查询JwUser -->
+	<select id="findJwUserByDeviceID" parameterClass="String"
+		resultClass="jwUser">
+		select distinct t.id,t.name,t.psw,t.sjhm,t.sjcm,t.jmkh,t.xzqh,
+			t.account,t.xb,t.islocked,t.description 
+		from jw_user t where t.sjcm=#sjcm#
+	</select>
+	<!--查找用户总数 -->
+	<select id="findJwJzByJwid" parameterClass="String"
+		resultClass="int">
+		select count(*)from jw_jz t where t.id=#id#
+
+
+	</select>
+	<!--查找警种总数 -->
+	<select id="findJwJzByJwJz" parameterClass="JwJz"
+		resultClass="int">
+		select count(*)from jw_jz t where t.id=#id#
+
+
+	</select>
+	<!--添加用户信息 -->
+
+	<insert id="addJwUser" parameterClass="JwUser">
+
+		<![CDATA[
+	
+    insert into jw_user (id,name,psw,sjhm,sjcm,jmkh,jz,xzqh,account,xb,description,jw_role_id,islocked)
+     values (#id#,#name#,#psw#,#sjhm#,#sjcm#,#jmkh#,#jz#,#xzqh#,#account#,#xb#,#description#,#jw_role#,#islocked#)
+
+		]]>
+	</insert>
+	<!--添加警种信息 -->
+
+	<insert id="addJwJz" parameterClass="JwJz">
+
+		<![CDATA[
+	
+    insert into jw_jz (id,name,description)
+     values (#id#,#name#,#description#)
+
+		]]>
+	</insert>
+	<!--根据用户ID查询用户信息记录 -->
+	<select id="findJwUserById" parameterClass="String"
+		resultClass="jwUser">
+		select
+		t.id,t.name,t.psw,t.sjhm,t.sjhm,t.sjcm,t.jmkh,t.jz,t.xzqh,t.account,t.xb,t.description,t.jw_role_id jw_role
+		from jw_user t where t.id=#id#
+	</select>
+	
+	<select id="isJwPswChange" parameterClass="jwUser" resultClass="int">
+		select count(1) from jw_user t where 1=1 and t.id=#id# and t.psw = #psw#
+	</select>
+	<!--根据警种ID查询警种信息记录 -->
+	<select id="findJwJzById" parameterClass="String"
+		resultClass="jwJz">
+		select t.id,t.name,t.description from jw_jz t where t.id=#id#
+	</select>
+	<!--修改用户信息 -->
+	<update id="editJwUser" parameterClass="jwUser">
+		update jw_user set name =#name#, psw= #psw#,sjhm=#sjhm#,
+		sjcm=#sjcm#,jmkh=#jmkh#,jz=#jz#,xzqh=#xzqh#,account=#account#,xb=#xb#,description=#description#,
+		jw_role_id=#jw_role#		
+		where id = #id#
+	</update>
+	
+	<update id="updateJwUserLockState" parameterClass="jwUser">
+	<!-- Modify by 陈萧如 start -->
+		update jw_user set islocked=#islocked#, LOGIN_FAILED_COUNT = 0 where id = #id#
+	<!-- Modify by 陈萧如 end -->
+	</update>
+	<!--修改警种信息 -->
+	<update id="editJwJz" parameterClass="jwJz">
+		update jw_jz set id =#id#, name
+		=#name#,description=#description# where id = #id#
+	</update>
+	<!--删除用户信息 -->
+	<delete id="delJwUser" parameterClass="String">
+		delete from jw_user where id= #id#
+	</delete>
+
+	<!--删除警种信息 -->
+	<delete id="delJwJz" parameterClass="String">
+		delete from jw_jz where id= #id#
+	</delete>
+</sqlMap>

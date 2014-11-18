@@ -1,0 +1,3 @@
+1、直接将platform导出成jar包；
+2、lib包引入；
+3、删除platform文件夹；

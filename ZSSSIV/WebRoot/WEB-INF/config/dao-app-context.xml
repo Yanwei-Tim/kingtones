@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- 全局DAO配置模板 -->
+
+	<bean id="defaultLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true"></bean>
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="platformSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:/com/kingtone/jw/ibatis/sqlMapConfig.xml" />
+		<property name="dataSource" ref="platformDataSource" />
+	</bean>
+	<bean id="platformOrmDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIOrmDao" abstract="true">
+		<property name="sqlMapClient" ref="platformSqlMapClient" />
+	</bean>
+	
+	<bean id="platDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIDAO" abstract="true">
+		<property name="dataSource">
+			<ref bean="platformDataSource" />
+		</property>
+		<property name="lobHandler">
+			<ref bean="defaultLobHandler" />
+		</property>
+	</bean>
+	
+	<bean id="confSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:/com/kingtone/jw/ibatis/sqlMapConfig.xml" />
+		<property name="dataSource" ref="confDataSource" />
+	</bean>
+	<bean id="confDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIDAO" abstract="true">
+		<property name="dataSource">
+			<ref bean="confDataSource" />
+		</property>
+		<property name="lobHandler">
+			<ref bean="defaultLobHandler" />
+		</property>
+	</bean>
+	<bean id="confOrmDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIOrmDao" abstract="true">
+		<property name="sqlMapClient" ref="confSqlMapClient" />
+	</bean>
+	
+	<bean id="bizDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIDAO" abstract="true">
+		<property name="dataSource">
+			<ref bean="bizDataSource" />
+		</property>
+		<property name="lobHandler">
+			<ref bean="defaultLobHandler" />
+		</property>
+	</bean>
+		<bean id="oaDaoProxy" lazy-init="true" class="com.kingtone.ssi.dao.SSIDAO" abstract="true">
+		<property name="dataSource">
+			<ref bean="oaDataSource" />
+		</property>
+		<property name="lobHandler">
+			<ref bean="defaultLobHandler" />
+		</property>
+	</bean>
+</beans>

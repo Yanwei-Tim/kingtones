@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="notice" type="com.kingtone.jw.biz.common.domain.Notice" />
+	<typeAlias alias="noticeUser" type="com.kingtone.jw.biz.common.domain.NoticeUser" />
+	<typeAlias alias="sjsb" type="com.kingtone.jw.biz.common.domain.Sjsb" />
+	<select id="findSjsbListByXzqh" parameterClass="sjsb" resultClass="sjsb">
+		select t.* from t_sjsb t where delflag!=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh=#xzqh#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 通知通报管理 -->
+	<!--分页查询通知通报所有信息-->
+	<select id="findAllNoticePageStrut" parameterClass="notice"
+		resultClass="notice">
+		select distinct t.* from
+		jw_tztg t  where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="type">
+				t.type=#type#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendDeptid">
+				(t.senddeptid in ($sendDeptid$))
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendStatus">
+				t.sendStatus=#sendStatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startdate">
+				t.sendtime >= to_date(#startdate#,'yyyy-mm-dd')
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="enddate" >
+				<![CDATA[
+				t.sendtime < to_date(#enddate#,'yyyy-mm-dd')+1
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.sendStatus, t.sendtime desc
+	</select>
+	<select id="findAllNoticePage" parameterClass="notice"
+		resultClass="notice">
+		select t.* from
+		jw_tztg t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="type">
+				t.type=#type#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendDeptid">
+				t.senddeptid =#sendDeptid#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendStatus">
+				t.sendStatus=#sendStatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startdate" >
+				t.sendtime >= to_date(#startdate#,'yyyy-mm-dd')
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="enddate" >
+				<![CDATA[
+				t.sendtime < to_date(#enddate#,'yyyy-mm-dd')+1
+				]]>
+			</isNotEmpty>
+		</dynamic>
+		order by t.sendStatus, t.sendtime desc
+	</select>
+	
+	<select id="findAllNoticeUserPage1" parameterClass="noticeUser"
+		resultClass="noticeUser">
+		select n.*,s.name xm,s.xzqh dw from jw_tztguser n,jw_user s 
+			where n.device_id = s.sjcm 
+				and n.noticeid=#id#
+		order by n.id desc
+	</select>
+	<!--分页查询通知通报所有信息 总数-->
+	<select id="findAllNoticePageCount" parameterClass="notice"
+		resultClass="int">
+		select count(t.id) from jw_tztg t 
+		where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="type">
+				t.type=#type#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendDeptid">
+				t.senddeptid=#sendDeptid#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sendStatus">
+				t.sendStatus=#sendStatus#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="startdate" >
+				t.sendtime >= to_date(#startdate#,'yyyy-mm-dd')
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="enddate" >
+				<![CDATA[
+				t.sendtime < to_date(#enddate#,'yyyy-mm-dd')+1
+				]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!--分页查询通知通报所有信息 总数-->
+	<select id="findAllNoticeUserPageCount1" parameterClass="noticeUser"
+		resultClass="int">
+		select count(*) from jw_tztguser t where t.noticeid=#id#
+		
+		
+	</select>
+	<!--添加通知主表信息 -->
+	<insert id="saveNotice" parameterClass="notice">
+		<selectKey keyProperty="id" resultClass="int">
+			select pk_t_tztg.nextval as id FROM DUAL
+		</selectKey>
+		insert into jw_tztg
+		(id,title,type,content,senduserid,sendusername,sendstatus,senddeptid,senddeptname,reqdevice_id,requsername,reqdeptId,reqdeptName,uploadfilename)
+		values
+		(#id#,#title#,#type#,#content#,#sendUserid#,#sendUsername#,#sendStatus#,#sendDeptid#,#sendDeptname#,#reqdevice_id#,#requsername#,#reqDeptId#,#reqDeptName#,#uploadFileName#)
+	</insert>
+	<!--发送通知主表信息 -->
+	<insert id="sendNotice" parameterClass="notice" >
+		<selectKey keyProperty="id" resultClass="int">
+			select pk_t_tztg.nextval as id FROM DUAL
+		</selectKey>
+		insert into jw_tztg
+		(id,title,type,content,senduserid,sendusername,sendtime,sendstatus,senddeptid,senddeptname,reqdevice_id,requsername,reqdeptId,reqdeptName,uploadfilename)
+		values
+		(#id#,#title#,#type#,#content#,#sendUserid#,#sendUsername#,#sendTime#,#sendStatus#,#sendDeptid#,#sendDeptname#,#reqdevice_id#,#requsername#,#reqDeptId#,#reqDeptName#,#uploadFileName#)
+	</insert>
+	<!--发送通知主表信息 -->
+	<insert id="sendNoticeuser" parameterClass="notice">
+		<selectKey keyProperty="id" resultClass="int">
+			select pk_T_tztgUSER.nextval as id FROM DUAL
+		</selectKey>
+		insert into jw_tztgUSER
+		(id,READSTATUS,NOTICEID,DEVICE_ID)
+		values
+		(#id#,#readStatus#,#noticeId#,#reqdevice_id#)
+	</insert>
+	<!--添加通知子表信息 -->
+	<insert id="saveNoticeUser" parameterClass="noticeUser">
+		<selectKey keyProperty="id" resultClass="int">
+			select pk_t_tztguser.nextval as id FROM DUAL
+		</selectKey>
+		insert into jw_tztguser
+		(id,requserid,readstatus,noticeid,device_id,reqdeptname) values
+		(#id#,#reqUserid#,#readstatus#,#noticeid#,#device_id#,#dw#)
+	</insert>
+	<!--修改通知主表信息 -->
+	<update id="updatenotice" parameterClass="notice">
+		update jw_tztg set
+		title=#title#,type=#type#,sendUserid=#sendUserid#,sendUsername=#sendUsername#,sendDeptid=#sendDeptid#,sendDeptname=#sendDeptname#,content=#content#,reqdevice_id=#reqdevice_id#,requsername=#requsername#,reqdeptId=#reqDeptId#,reqdeptName=#reqDeptName#
+		where id=#id#
+	</update>
+	<update id="updatesendnotice" parameterClass="notice">
+		update jw_tztg set
+		title=#title#,type=#type#,content=#content#,reqdevice_id=#reqdevice_id#,requsername=#requsername#,reqdeptId=#reqDeptId#,
+		reqdeptName=#reqDeptName#,
+		sendstatus=#sendStatus#,
+		sendtime=#sendTime#,
+		sendUserid=#sendUserid#,sendUsername=#sendUsername#,sendDeptid=#sendDeptid#,sendDeptname=#sendDeptname#,
+		uploadfilename=#uploadFileName#
+		where id=#id#
+	</update>
+	<!--修改通知主表信息中的附件名称 -->
+	<update id="updateNoticeAttach" parameterClass="notice">
+		update jw_tztg set uploadFileName=#uploadFileName# where
+		id=#id#
+	</update>
+	
+	<!--删除通知主表信息 -->
+	<delete id="deleteNotice" parameterClass="int">
+		delete from jw_tztg where id=#id#
+	</delete>
+	<!--删除通知子表信息 -->
+	<delete id="deleteNoticeUser" parameterClass="int">
+		delete from jw_tztgUSER where noticeid=#id#
+	</delete>
+	<!--删除通知子表信息 通过noticeid -->
+	<delete id="deleteNoticeUserByNoticeid" parameterClass="int">
+		delete from jw_tztgUSER where noticeid=#noticeid#
+	</delete>
+	<!-- 根据id查找通知主表信息-->
+	<select id="findNoticeById" parameterClass="int"
+		resultClass="notice">
+		select * from jw_tztg where id=#id#
+	</select>
+	<!-- 根据device_id查找通知子表信息-->
+	<select id="findNoticeUserByNoticeid" parameterClass="int"
+		resultClass="noticeuser">
+		select t.*,t.REQDEPTNAME dw,s.xm xm from jw_tztgUSER t,t_sjsb s
+		where noticeid=#noticeid# and t.device_id = s.device_id
+	</select>
+	<!-- 根据device_id查找通知子表信息-->
+	<select id="findNoticeUserDepByNoticeid" parameterClass="int"
+		resultClass="noticeuser">
+		select t.*,t.REQDEPTNAME dw from jw_tztgUSER t where
+		noticeid=#noticeid# and t.device_id is null
+	</select>
+	<!--分页查询通知通报所有信息签收情况 总数-->
+	<select id="findAllNoticeUserPageCount" parameterClass="int"
+		resultClass="int">
+		select count(t.id) from jw_tztgUSER t,t_sjsb s where
+		noticeid=#noticeid# and t.device_id = s.device_id
+	</select>
+	<!--分页查询通知通报所有信息签收情况-->
+	<select id="findAllNoticeUserPage" parameterClass="int"
+		resultClass="noticeuser">
+		select t.*,s.xm xm,s.dw dw,s.bm bm from jw_tztgUSER t,t_sjsb s
+		where noticeid=#noticeid# and t.device_id = s.device_id order by
+		t.readstatus ,t.receivetime desc
+	</select>
+	
+	<select id="getMaxNoticeID" resultClass="notice">
+		select t.* from jw_tztg t where t.id=(select max(id) from jw_tztg)
+	</select>
+	
+</sqlMap>

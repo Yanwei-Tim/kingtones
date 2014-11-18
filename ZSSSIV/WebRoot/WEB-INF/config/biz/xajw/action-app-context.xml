@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	<bean id="jwLogAC" class="com.kingtone.jw.biz.xajw.JwLogAC" scope="prototype">
+		<property name="jwLogBS" ref="jwLogBS"/>
+	</bean>	
+	
+	<bean id="jwUserAC" class="com.kingtone.jw.biz.xajw.JwUserAC" scope="prototype">
+		<property name="jwUserBS" ref="jwUserBS"/>
+		<property name="sjcjBS" ref="sjcjBS"></property>
+		<property name="unitBS" ref="unitBS"></property>
+	</bean>	
+	<bean id="jwRoleAC" class="com.kingtone.jw.biz.xajw.JwRoleAC" scope="prototype">
+		<property name="jwRoleBS" ref="jwRoleBS"/>
+	</bean>
+	<!-- add hanliqiang start-->
+	<bean id="jwGpsConfigAC" class="com.kingtone.jw.biz.xajw.JwGpsConfigAC" scope="prototype">
+		<property name="gpsConfigBS" ref="gpsConfigBS"/>
+	</bean>	
+	<bean id="jwVideoAC" class="com.kingtone.jw.biz.xajw.JwVideoAC" scope="prototype">
+		<property name="jwVideoBS" ref="jwVideoBS"/>
+	</bean>	
+	<!-- add hanliqiang end-->	
+	
+	<!-- 定位调度管理 -->
+	<bean id="jwGpsManagerAC" class="com.kingtone.jw.biz.xajw.JwGpsManagerAC" scope="prototype">
+		<property name="gpsManagerBS" ref="gpsManagerBS"/>
+	</bean>	
+	<bean id="jwUserDisplayAC" class="com.kingtone.jw.biz.xajw.JwUserDisplayAC" scope="prototype">
+		<property name="userDisplayBS" ref="userDisplayBS"/>
+		<property name="unitBS" ref="unitBS"></property>
+		<property name="jwUserBS" ref="jwUserBS"/>
+	</bean>
+</beans>

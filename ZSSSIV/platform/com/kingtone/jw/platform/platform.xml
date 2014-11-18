@@ -1,0 +1,1265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+
+	<typeAlias alias="code" type="com.kingtone.jw.platform.domain.Code" />
+	<typeAlias alias="organ" type="com.kingtone.jw.platform.domain.Organization" />
+	<typeAlias alias="jquser" type="com.kingtone.jw.platform.domain.JqUser" />
+	<typeAlias alias="dispatch" type="com.kingtone.jw.platform.domain.Dispatch" />
+	<typeAlias alias="jqcount" type="com.kingtone.jw.platform.domain.JqCount" />
+	<typeAlias alias="unit" type="com.kingtone.jw.platform.domain.Unit" />
+	<typeAlias alias="user" type="com.kingtone.jw.platform.domain.User" />
+	<typeAlias alias="menu" type="com.kingtone.jw.platform.domain.Menu" />
+	<typeAlias alias="button" type="com.kingtone.jw.platform.domain.Button"/>
+	<typeAlias alias="userLog" type="com.kingtone.jw.platform.domain.UserLog"/>
+	<typeAlias alias="account"
+		type="com.kingtone.jw.platform.domain.Account" />
+	<typeAlias alias="resource"
+		type="com.kingtone.jw.platform.domain.Resource" />
+	<typeAlias alias="role" type="com.kingtone.jw.platform.domain.Role" />
+	<typeAlias alias="roleMenu"
+		type="com.kingtone.jw.platform.domain.RoleMenu" />
+	<typeAlias alias="roleRescource"
+		type="com.kingtone.jw.platform.domain.RoleRescource" />
+		
+	<!-- 警情，yulipeng -->
+	
+	<!-- 查询null根节点 -->
+	<select id="queryHead" resultClass="String">
+		select id from JQ_ORGANIZATION where parent_id is null		
+	</select>
+	
+	<select id="findPulicSituation" parameterClass="organ" resultClass="organ"><!--查找organ树（中间） -->
+		select t.id ,t.name ,t.code ,t.description ,t.parent_id,t.sort from JQ_ORGANIZATION t 
+		where 1=1
+		  <dynamic>
+		  	<isNotEmpty prepend="and" property="parent_id">
+				t.parent_id =#parent_id#
+			</isNotEmpty>
+			 <isNotEmpty prepend="and" property="id">
+				t.id like '%'||#id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="code">
+				t.code like '%'||#code#||'%'
+			</isNotEmpty>			
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+		</dynamic> 
+		order by t.sort asc
+	</select>
+	
+	<!--查找organ右边内容 -->
+	<select id="queryAllJqParantNames" parameterClass="organ" resultClass="organ">
+		select a.id,a.name,a.description,a.code,a.parent_id,a.sort, b.name as parent_name 
+    from JQ_ORGANIZATION a, JQ_ORGANIZATION b where a.parent_id=b.id  
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				a.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="code">
+				a.code like '%'||#code#||'%'
+			</isNotEmpty>
+		</dynamic>
+		order by a.sort asc
+	</select>
+	<!--根据pid查找organ右边内容 -->
+	<select id="queryAllJqParantNames2" parameterClass="organ" resultClass="organ">
+		select a.id,a.name,a.description,a.code,a.parent_id,a.sort, b.name as parent_name 
+    from JQ_ORGANIZATION a, JQ_ORGANIZATION b where a.parent_id=b.id and a.parent_id =#parent_id#
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				a.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="code">
+				a.code like '%'||#code#||'%'
+			</isNotEmpty>
+		</dynamic>
+		order by a.sort asc
+	</select>
+	<!--查找code是否重复 -->
+	<select id="countJqByCode" parameterClass="String"
+		resultClass="int">
+		select count(*)from JQ_ORGANIZATION t where 1=1 and t.code=#code#		
+	</select>
+	
+	<!--添加organ机构信息 -->
+	<insert id="organAdd" parameterClass="organ">
+		<![CDATA[
+	insert into JQ_ORGANIZATION (id,name,code,description,parent_id,sort) 
+    values(#id#,#name#,#code#,#description#,#parent_id#,#sort#)
+		]]>
+	</insert>
+	
+	<!--根据id查询机构信息记录 （修改里面用）-->
+	<select id="findJqByID" parameterClass="String" resultClass="organ">
+		select t.id,t.code,t.name,t.description,t.sort,t.parent_id,t1.name as parent_name
+		 from JQ_ORGANIZATION t left JOIN JQ_ORGANIZATION t1 on t.parent_id = t1.id where t.id=#id#
+	</select>
+	
+	<!--查找所有单元总数 判断code是否重复 -->
+	<select id="findJqByCodeJq" parameterClass="organ" resultClass="int">
+		select count(*)from JQ_ORGANIZATION t where 1=1 and t.code=#code# and t.id !=#id#	
+
+	</select>
+	
+	<!--修改organ机构信息 -->
+	<update id="jqUpdate" parameterClass="organ">
+		update JQ_ORGANIZATION set name=#name#,description=#description#,parent_id=#parent_id#,code=#code#,sort=#sort# where id=#id#
+	</update>
+	
+	<!--查找是否有子节点(用于删除) -->
+	<select id="findJqSonCount" parameterClass="organ" resultClass="int">
+		select count(b.id) from JQ_ORGANIZATION a,JQ_ORGANIZATION b where a.id=b.parent_id and a.id=#id#	
+	</select>
+	
+	<!--查找是否有相关用户(用于删除) -->
+	<select id="findJqUserCount" parameterClass="organ" resultClass="int">
+		select count(b.id) from JQ_ORGANIZATION a,JQ_USER b where a.id=b.org_id and a.id=#id#
+	</select>
+	
+	<!--删除organ机构信息 -->
+	<delete id="organDelete" parameterClass="String">
+		delete from JQ_ORGANIZATION t where t.id =#id#
+	</delete>
+	
+	<!-- 下列 -用户管理 -->
+	<!-- 查询根节点的id -->
+	<select id="findHeadUser" resultClass="String">
+	select distinct a.id from JQ_ORGANIZATION a,JQ_ORGANIZATION b where a.parent_id=b.id and b.parent_id is null
+	</select>
+	<!-- 查询机构中的所对应的用户 -->
+	<select id="findJqUser" parameterClass="jquser" resultClass="jquser">
+	select distinct a.id,a.code,a.name,a.account,b.name as org_name,a.status,a.sort 
+	from JQ_USER a,JQ_ORGANIZATION b where a.org_id=b.id and a.org_id=#org_id# 
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				a.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="account">
+				a.account like '%'||#account#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="code">
+				a.code like '%'||#code#||'%'
+			</isNotEmpty>
+		</dynamic>
+	order by a.sort asc
+	</select>
+	
+	<!-- 查询所有的机构用户 -->
+	<select id="findJqAllUser" parameterClass="jquser" resultClass="jquser">
+	select distinct a.id,a.code,a.name,a.account,b.name as org_name,a.status,a.sort 
+	from JQ_USER a,JQ_ORGANIZATION b where a.org_id=b.id 
+		<dynamic>
+			<isNotEmpty prepend="and" property="name">
+				a.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="account">
+				a.account like '%'||#account#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="code">
+				a.code like '%'||#code#||'%'
+			</isNotEmpty>
+		</dynamic>
+	order by a.sort asc
+	</select>
+	
+	<!--查找用户code和account是否重复 -->
+	<select id="countJqByCandA" parameterClass="jquser" resultClass="int">
+		select count(*) from JQ_USER t where t.code=#code# or t.account=#account#		
+	</select>
+	
+	<!--添加organ用户信息 -->
+	<insert id="JqUserAdd" parameterClass="jquser">
+		<![CDATA[
+	insert into JQ_USER (id,code,name,account,org_id,status,sort) 
+    values(#id#,#code#,#name#,#account#,#org_id#,#status#,#sort#)
+		]]>
+	</insert>
+	
+	<!--根据id查询用户信息记录 （修改里面用）-->
+	<select id="findJqUserByID" parameterClass="String" resultClass="jquser">
+		select t.id,t.code,t.name,t.account,t.status,t.sort,t1.name as org_name, t.org_id
+		from JQ_USER t left JOIN JQ_ORGANIZATION t1 on t.org_id = t1.id where t.id=#id#
+	</select>
+	
+	<!--查找用户总数 判断code和account是否重复 -->
+	<select id="findJqByUserxg" parameterClass="jquser" resultClass="int">
+		select count(*)from JQ_USER t where 1=1 and t.id !=#id# and (t.code=#code# or t.account=#account#) 			
+	</select>
+	
+	<!--修改用户信息 -->
+	<update id="jqUserUpdate" parameterClass="jquser">
+		update JQ_USER set name=#name#,account=#account#,org_id=#org_id#,code=#code#,sort=#sort#,status=#status# where id=#id#
+	</update>
+	
+	<!--查找是否有相关处警信息(用于删除用户) -->
+	<select id="findJqDispatchCount" parameterClass="jquser" resultClass="int">
+		select count(b.id) from JQ_USER a,JQ_DISPATCH b where a.id=b.user_id and a.id=#id#
+	</select>
+	
+	<!--删除user用户机构信息 -->
+	<delete id="userJqDelete" parameterClass="String">
+		delete from JQ_USER t where t.id =#id#
+	</delete>
+	
+	<!-- 获取所有机构子节点 (用于Excel导出) -->
+	<select id="getOrganAll" resultClass="organ">
+		select a.id,a.name,a.description,a.code,a.parent_id,a.sort, b.name as parent_name 
+		from JQ_ORGANIZATION a, JQ_ORGANIZATION b where a.parent_id=b.id order by a.sort asc
+	</select>
+	 <!-- 根据id获取所有机构子节点 (用于Excel导出) -->
+	<select id="getOrganAllbyId" parameterClass="String" resultClass="organ">
+		select a.id,a.name,a.description,a.code,a.parent_id,a.sort, b.name as parent_name 
+		from JQ_ORGANIZATION a, JQ_ORGANIZATION b where a.parent_id=b.id start with a.parent_id =#id# 
+		connect by prior a.id=a.parent_id order by a.sort asc
+	</select>
+		
+	<!--导入警情机构信息信息 (用于Excel导入) -->
+	<insert id="importorgan" parameterClass="organ">
+		<![CDATA[
+	insert into JQ_ORGANIZATION (id,name,code,description,parent_id,sort)
+	 values(#id#,#name#,#code#,#description#,#parent_id#,#sort#)
+		]]>
+	</insert>
+	
+	<!-- 获取所有用户子节点 (用于Excel导出) -->
+	<select id="getUserAll" resultClass="jquser">
+		select a.id,a.name,a.account,a.code,a.org_id,a.sort,a.status, b.name as org_name 
+		from JQ_USER a, JQ_ORGANIZATION b where a.org_id=b.id order by a.sort asc
+	</select>
+	 <!-- 根据id获取所有用户子节点 (用于Excel导出) -->
+	<select id="getUserAllbyId" parameterClass="String" resultClass="jquser">
+		select distinct a.id,a.code,a.name,a.account,b.name as org_name,a.status,a.sort 
+	from JQ_USER a,JQ_ORGANIZATION b where a.org_id=b.id and a.org_id=#id# order by a.sort asc
+	</select>
+	
+	<!--导入警情机构信息信息 (用于Excel导入) -->
+	<insert id="importusers" parameterClass="jquser">
+		<![CDATA[
+	insert into JQ_USER (id,code,name,account,org_id,status,sort)
+	 values(#id#,#code#,#name#,#account#,#org_id#,#status#,#sort#)
+		]]>
+	</insert>
+	
+	<!-- 统计 -->
+	<!-- 统计人员处警信息 -->
+	<select id="countAllUser" parameterClass="jqcount" resultClass="jqcount">
+		select distinct a.sort,a.name,a.account,c.name as org_name,
+(select count(b1.id) from JQ_DISPATCH b1 where b1.user_id=b.user_id and to_char(b1.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd')) as accept,
+(select count(b2.id) from JQ_DISPATCH b2 where b2.status>=1 and b2.user_id=b.user_id and to_char(b2.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd')) as reach,
+(select count(b3.id) from JQ_DISPATCH b3 where b3.status=2 and b3.user_id=b.user_id and to_char(b3.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd')) as finish,
+to_char(#stime#,'YYYY-mm-dd HH24:MI:SS') as stime,to_char(#etime#,'YYYY-mm-dd HH24:MI:SS') as etime
+from JQ_USER a left join JQ_DISPATCH b on a.id=b.user_id,JQ_ORGANIZATION c where a.org_id=c.id
+		<dynamic>
+			<isNotEmpty prepend="and" property="org_id">
+				a.org_id =#org_id#
+			</isNotEmpty>
+		</dynamic>
+order by a.sort asc		
+	</select>
+	
+	<!--添加dispatch处警信息 -->
+	<insert id="JqDispatchAdd" parameterClass="dispatch">
+		<![CDATA[
+	insert into JQ_DISPATCH (id,user_id,user_code,description,status,contact1,contact2,address,gps_point,start_time,end_time) 
+    values(#id#,#user_id#,#user_code#,#description#,#status#,#contact1#,#contact2#,#address#,#gps_point#,#start_time#,#end_time#)
+		]]>
+	</insert>
+	
+	<!--修改dispatch处警信息 -->
+	<update id="JqDispatchUpdate" parameterClass="dispatch">
+		update JQ_DISPATCH set status=#status#,end_time=#end_time# where id=#id#
+	</update>
+	
+	<!-- 统计机构处警信息 ,o.parent_id=#parent_id#  改为o.id -->
+	<select id="countAllUnit" parameterClass="jqcount" resultClass="jqcount">
+	select distinct o.name,o.sort,case when sum(u.dcount) is null then 0 else sum(u.dcount) end as accept,case when sum(u2.dcount2) is null then 0 else sum(u2.dcount2) end as reach,case when sum(u3.dcount3) is null then 0 else sum(u3.dcount3) end as finish,
+	to_char(#stime#,'YYYY-mm-dd HH24:MI:SS') as stime,to_char(#etime#,'YYYY-mm-dd HH24:MI:SS') as etime 
+	from JQ_ORGANIZATION o left join 
+(select a.org_id,count(b.id) as dcount from JQ_DISPATCH b,JQ_USER a where b.status>=0 and b.user_id=a.id and to_char(b.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd') group by a.org_id) u 
+on o.id=u.org_id left join 
+(select a1.org_id,count(b1.id) as dcount2 from JQ_DISPATCH b1 , JQ_USER a1 where b1.status>=1 and b1.user_id=a1.id and to_char(b1.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd') group by a1.org_id) u2
+on o.id=u2.org_id left join
+(select a2.org_id,count(b2.id) as dcount3 from JQ_DISPATCH b2 , JQ_USER a2 where b2.status=2 and b2.user_id=a2.id and to_char(b2.start_time,'yyyy-mm-dd') between to_char(#stime#,'yyyy-mm-dd') and to_char(#etime#,'yyyy-mm-dd') group by a2.org_id) u3
+on o.id=u3.org_id 
+start with o.id=#parent_id# connect by prior o.id= o.parent_id group by o.name,o.sort order by o.sort 
+
+	</select>
+	<!-- JQ分割线，以上为警情模块 -->
+	
+	<select id="findCodeListByType" parameterClass="code"
+		resultClass="code">
+		select t.* from ssi_code t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="codetype">
+				t.codetype =#codetype#
+			</isNotEmpty>
+		</dynamic>
+		order by t.code asc
+	</select>
+	<select id="findUnitPageStruct" parameterClass="unit"
+		resultClass="unit">
+		select distinct t.unit_id ,t.unit_name ,t.description ,t.parent_id ,t.is_leaf,t.xzqh,t.orderid ,a.unit_name as parent_name from ssi_org_unit t,ssi_org_unit a 
+		 where 1=1 and t.parent_id=a.unit_id 
+		<dynamic>
+			<isNotEmpty prepend="and" property="unit_id">
+				t.unit_id like '%'||#unit_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unit_name">
+				t.unit_name like '%'||#unit_name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parent_id">
+				(t.parent_id in ($parent_id$))
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="is_leaf">
+				t.is_leaf like '%'||#is_leaf#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh like '%'||#xzqh#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+		order by t.orderid asc
+	</select>
+	
+	 <select id="getUnitByID" 
+		resultClass="unit">
+		select t.unit_id ,t.unit_name ,t.description ,t.parent_id
+		,t.is_leaf,t.xzqh,t.orderid from ssi_org_unit t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="unit_id">
+				t.unit_id = #unit_id#
+			</isNotEmpty>
+		</dynamic>
+		order by t.orderid asc
+	</select>
+	
+	<!--查找所有单元信息 -->
+	<select id="findAllUnitPage" parameterClass="unit"
+		resultClass="unit">
+		select t.unit_id ,t.unit_name ,t.description ,t.parent_id
+		,t.is_leaf,t.xzqh,t.orderid from ssi_org_unit t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="unit_id">
+				t.unit_id like '%'||#unit_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unit_name">
+				t.unit_name like '%'||#unit_name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parent_id">
+				t.parent_id =#parent_id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="is_leaf">
+				t.is_leaf like '%'||#is_leaf#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh like '%'||#xzqh#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+		order by t.orderid asc
+	</select>
+    <select id="getUnit" 
+		resultClass="unit">
+		select t.unit_id ,t.unit_name ,t.description ,t.parent_id
+		,t.is_leaf,t.xzqh,t.orderid ,a.unit_name as parent_name from ssi_org_unit t, ssi_org_unit a 
+		 where 1=1 and t.parent_id = a.unit_id
+
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findUnitByParent_id" parameterClass="String"
+		resultClass="int">
+		select count(*)from ssi_org_unit t where 1=1 and t.parent_id=#parent_id#
+		
+	</select>
+	<!--导出用户信息 -->
+	<select id="getAllTuser" parameterClass="user" resultClass="user">
+		select t.full_name as
+    fullName,t.sex,t.tel,t.email,t.description,b.username,b.password,b.expired_date,b.locked
+    from ssi_org_user t, ssi_org_account b where t.user_id=b.user_id
+    
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findUnitPageCount" parameterClass="unit"
+		resultClass="int">
+		select count(*)from ssi_org_unit t where 1=1
+		<dynamic>
+			<isNotEmpty prepend="or" property="unit_id">
+				t.unit_id like '%'||#unit_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="unit_name">
+				t.unit_name like '%'||#unit_name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				t.description like '%'||#description#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parent_id">
+				t.parent_id =#parent_id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="xzqh">
+				t.xzqh =#xzqh#
+			</isNotEmpty>
+
+		</dynamic>
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findUnitPageCountimport" parameterClass="String"
+		resultClass="int">
+		select count(*)from ssi_org_unit t where 1=1 and t.unit_id =#unitid#
+			
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="countUnitByXzqh" parameterClass="String"
+		resultClass="int">
+		select count(*)from ssi_org_unit t where 1=1 and t.xzqh=#xzqh#
+		
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findUnitByXzqhUnit" parameterClass="unit"
+		resultClass="int">
+		select count(*)from ssi_org_unit t where 1=1 and t.xzqh=#xzqh# and t.unit_id !=#unit_id#
+		
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findUserByUser" parameterClass="user"
+		resultClass="int">
+		select count(*)from SSI_ORG_ACCOUNT t where 1=1 and t.username=#username# and t.ACCOUNT_ID !=#account_id#
+	</select>
+	<select id="isPswChange" parameterClass="user" resultClass="int">
+		select count(1) from ssi_org_account t where 1=1 and t.account_id=#account_id# and t.password = #password#
+	</select>
+	<!--删除单元信息 -->
+	<delete id="unitDelete" parameterClass="String">
+		delete from ssi_org_unit t where t.unit_id =#unit_id#
+	</delete>
+	<!--删除单元信息 -->
+	<delete id="unitDeleteId" parameterClass="String">
+		delete from ssi_org_unit t where t.xzqh =#xzqh#
+	</delete>
+	<!--根据Unitid查询单位信息记录 -->
+	<select id="findUnitByID" parameterClass="String"
+		resultClass="unit">
+		select t.unit_id,
+		       t.xzqh,
+		       t.unit_name,
+		       t.description,
+		       t.parent_id,
+		       t.is_leaf,
+		       t.orderid,
+		       t1.unit_name as parent_name
+		  from ssi_org_unit t
+		  left JOIN ssi_org_unit t1 on t.parent_id = t1.unit_ID
+		 where t.unit_id=#unit_id#
+	</select>
+	<!--根据xzqh查询单位信息记录 -->
+	<select id="findUnitByXzqh1" parameterClass="String"
+		resultClass="unit">
+		select t.unit_id,t.unit_name from ssi_org_unit t where t.xzqh=#xzqh#
+	</select>
+	<!--根据XZQH查询单位信息记录 -->
+	<select id="findUnitByxzqh" parameterClass="String"
+		resultClass="unit">
+		select t.unit_id ,t.xzqh,t.unit_name ,t.description ,t.parent_id
+		,t.is_leaf from ssi_org_unit t where t.xzqh=#xzqh#
+	</select>
+	<!--修改单元信息 -->
+	<update id="unitUpdate" parameterClass="unit">
+		update ssi_org_unit set
+		unit_name=#unit_name#,description=#description#,parent_id=#parent_id#,xzqh=#xzqh#,orderid=#orderid#
+		where unit_id=#unit_id#
+	</update>
+	<!--添加单元信息 -->
+
+	<insert id="unitAdd" parameterClass="unit">
+
+		<![CDATA[
+	insert into ssi_org_unit (unit_id,unit_name,description,parent_id,is_leaf,xzqh,orderid) 
+    values(#unit_id#,#unit_name#,#description#,#parent_id#,#is_leaf#,#xzqh#,#orderid#)
+
+		]]>
+	</insert>
+	<!--导入单元信息 -->
+
+	<insert id="importunit" parameterClass="unit">
+
+		<![CDATA[
+	insert into ssi_org_unit (unit_id,unit_name,description,parent_id,is_leaf,xzqh,orderid) 
+    values(#unit_id#,#unit_name#,#description#,#parent_id#,#is_leaf#,#xzqh#,#orderid#)
+
+		]]>
+	</insert>
+	<!--导入用户信息 -->
+
+	<insert id="importUser" parameterClass="user">
+
+		<![CDATA[
+	insert into ssi_org_user (user_id,full_name,description,sex,tel,email) 
+    values(#userID#,#fullName#,#description#,#sex#,#tell#,#email#)
+
+		]]>
+	</insert>
+	<!--导入账号信息 -->
+
+	<insert id="importaccount" parameterClass="account">
+
+		<![CDATA[
+	insert into ssi_org_account (account_id,user_id,username,password,registe_date,expired_date,locked) 
+    values(#account_id#,#user_id#,#username#,#password#,#register_date#,#expired_date#,#locked#)
+    
+
+		]]>
+	</insert>
+
+<!--查找用户总数信息 -->
+	<select id="findUnitUser" parameterClass="user"
+		resultClass="user">
+		select  u.full_name as fullName,u.sex,u.tel,u.email,
+		u.description,b.username,b.password,b.expired_date,b.locked
+		 from ssi_org_user u,ssi_org_m_user_unit m ,ssi_org_account b
+		where u.user_id=m.user_id and u.user_id=b.user_id 
+		<dynamic>
+			<isNotEmpty prepend="and" property="unitID">
+				(m.unit_id in ($unitID$))
+			</isNotEmpty>
+		</dynamic>
+		order by u.user_id desc
+	</select>
+
+	<!--查找用户总数信息 -->
+	<select id="findAllUserPageStruct" parameterClass="user"
+		resultClass="user">
+		select distinct u.user_id as userID,u.full_name as fullName,u.sex as
+		sex,u.description,t.unit_name as unitName from ssi_org_user u,ssi_org_m_user_unit m,ssi_org_unit t 
+		where u.user_id=m.user_id and t.unit_id=m.unit_id and u.user_id != 'admin'
+		<dynamic>
+			<isNotEmpty prepend="and" property="unitID">
+				(m.unit_id in ($unitID$))
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="fullName">
+				u.full_name like '%'||#fullName#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="userID">
+				u.user_id like '%'||#userID#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sex">
+				u.sex=#sex#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				u.description like '%'||#description#||'%'
+			</isNotEmpty>
+		</dynamic>
+		order by u.user_id desc
+	</select>
+	<select id="findAllUserPage" parameterClass="user"
+		resultClass="user">
+		select u.user_id as userID,u.full_name as fullName,u.sex as
+		sex,u.description,t.unit_Name as unitName from ssi_org_user u,ssi_org_m_user_unit m,ssi_org_unit t
+		where u.user_id=m.user_id and u.user_id != 'admin' and m.unit_id=t.unit_id
+		<dynamic>
+			<isNotEmpty prepend="and" property="unitID">
+				m.unit_id=#unitID#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="fullName">
+				u.full_name like '%'||#fullName#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="userID">
+				u.user_id like '%'||#userID#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sex">
+				u.sex=#sex#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				u.description like '%'||#description#||'%'
+			</isNotEmpty>
+		</dynamic>
+		order by u.user_id desc
+	</select>
+	<!--查找用户总数信息 -->
+	<select id="findAllUserPagenotunit" parameterClass="user"
+		resultClass="user">
+		select u.user_id as userID,u.full_name as fullName,u.sex as
+		sex,u.description from ssi_org_user u,ssi_org_m_user_unit m
+		where u.user_id=m.user_id and m.unit_id=#unitID# and  u.user_id!='admin'
+		order by u.user_id desc
+	</select>
+	<!--查找用户总数信息 -->
+	<select id="findUserListCountuserName" parameterClass="String"
+		resultClass="int">
+		select count(*) from SSI_ORG_ACCOUNT a where
+		a.username=#userName#
+
+	</select>
+	<!--查找所有FullName总数 -->
+	<select id="findUserByFullName" parameterClass="String"
+		resultClass="int">
+		select count(*)from ssi_org_user t where 1=1 and t.full_name=#fullName#
+		
+	</select>
+	<!--查找所有UserName总数 -->
+	<select id="findUserByUserName" parameterClass="String"
+		resultClass="int">
+		select count(*) from SSI_ORG_ACCOUNT a where
+		a.username=#userName#
+		
+	</select>
+	<!--查找用户总数 -->
+	<select id="findUserPageCount" parameterClass="user"
+		resultClass="int">
+		select count(*) from ssi_org_user u,ssi_org_m_user_unit m where
+		u.user_id=m.user_id
+		<dynamic>
+			<isNotEmpty prepend="and" property="unitID">
+				m.unit_id=#unitID#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="fullName">
+				u.full_name like '%'||#fullName#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="userID">
+				u.user_id like '%'||#userID#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sex">
+				u.sex=#sex#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				u.description like '%'||#description#||'%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+		<select id="findAllCountnotunit" parameterClass="user"
+		resultClass="int">
+		select count(*) from ssi_org_user u,ssi_org_m_user_unit m where
+		u.user_id=m.user_id  and u.user_id!='admin'
+		
+		<dynamic>
+			<isNotEmpty prepend="and" property="unitID">
+				(m.unit_id in ($unitID$))
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="findUserPageCountnotunit" parameterClass="user"
+		resultClass="int">
+		select count(*) from ssi_org_user u,ssi_org_m_user_unit m where
+		u.user_id=m.user_id and m.unit_id=#unitID# and u.user_id!='admin'
+		
+		<dynamic>
+			<isNotEmpty prepend="and" property="fullName">
+				u.full_name like '%'||#fullName#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="userID">
+				u.user_id like '%'||#userID#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="sex">
+				u.sex=#sex#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="description">
+				u.description like '%'||#description#||'%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	
+	<!--查找用户总数 -->
+	<select id="findUserPageCountUnit" parameterClass="user"
+		resultClass="int">
+		select count(*) from ssi_org_user u,ssi_org_m_user_unit m where
+		m.unit_id=#unitID#
+	</select>
+	<!--查找Xzqh是否重复 -->
+	<select id="findUnitListCountByXzqh" parameterClass="String"
+		resultClass="int">
+		select count(*) from ssi_org_unit u where
+		u.xzqh=#xzqh#
+	</select>
+	<!--删除用户信息 -->
+	<delete id="userDelete" parameterClass="String">
+		delete from ssi_org_user where user_id= #user_id#
+	</delete>
+	<delete id="USERUNITDelete" parameterClass="String">
+		delete from ssi_org_m_user_unit where user_id= #user_id#
+	</delete>
+	<delete id="UserRoleDelete" parameterClass="String">
+
+		delete from ssi_auth_m_user_role where user_id= #user_id#
+	</delete>
+	<delete id="accountDelete" parameterClass="String">
+		delete from ssi_org_account where user_id= #user_id#
+	</delete>
+
+	<select id="findAllMenuPage" parameterClass="menu"
+		resultClass="menu">
+		select t.menu_id,t.resource_id, t.name,
+		t.description,t.position,t.parent_id, t.url, case when (select
+		count(1) from ssi_auth_menu tt where tt.parent_id = t.menu_id
+		)>0 then 0 else 1 end leaf from ssi_auth_resource r,
+		ssi_auth_menu t where r.resource_id = t.resource_id and
+		t.parent_id is null
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="menu_id">
+				t.menu_id like '%'||#menu_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resource_id">
+				t.resource_id like '%'||#resource_id#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="url">
+				t.url like '%'||#url#||'%'
+			</isNotEmpty>
+			ORDER BY T.POSITION ASC
+		</dynamic>
+
+	</select>
+
+	<select id="findAllMenuPage1" parameterClass="menu"
+		resultClass="menu">
+		select t.menu_id,t.resource_id, t.name,
+		t.description,t.position,t.parent_id, t.url, case when (select
+		count(1) from ssi_auth_menu tt where tt.parent_id = t.menu_id
+		)>0 then 0 else 1 end leaf from ssi_auth_resource r,
+		ssi_auth_menu t where r.resource_id = t.resource_id
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="menu_id">
+				t.menu_id like '%'||#menu_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resource_id">
+				t.resource_id like '%'||#resource_id#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="url">
+				t.url like '%'||#url#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parent_id">
+				t.parent_id =#parent_id#
+			</isNotEmpty>
+			ORDER BY T.POSITION ASC
+		</dynamic>
+
+	</select>
+	<!--查找所有单元树 -->
+	<select id="findAllMenuPagetree" parameterClass="menu"
+		resultClass="menu">
+		select t.menu_id,t.resource_id, t.name,
+		t.description,t.position,t.parent_id, t.url, case when (select
+		count(1) from ssi_auth_menu tt where tt.parent_id = t.menu_id
+		)>0 then 0 else 1 end leaf from ssi_auth_resource r,
+		ssi_auth_menu t where r.resource_id = t.resource_id and
+		t.parent_id is null ORDER BY T.POSITION ASC
+
+	</select>
+
+	<!--查找所有单元总数 -->
+	<select id="findMenuPageCount" parameterClass="menu"
+		resultClass="int">
+		select count(*) from ssi_auth_resource r, ssi_auth_menu t where
+		r.resource_id = t.resource_id
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="menu_id">
+				t.menu_id like '%'||#menu_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resource_id">
+				t.resource_id like '%'||#resource_id#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="url">
+				t.url like '%'||#url#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parent_id">
+				t.parent_id =#parent_id#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!--查找所有单元总数 -->
+	<select id="findMenuPageCount1" parameterClass="menu"
+		resultClass="int">
+		select count(*) from ssi_auth_resource r, ssi_auth_menu t where
+		r.resource_id = t.resource_id and t.parent_id is null
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="menu_id">
+				t.menu_id like '%'||#menu_id#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="resource_id">
+				t.resource_id like '%'||#resource_id#||'%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="and" property="name">
+				t.name like '%'||#name#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="url">
+				t.url like '%'||#url#||'%'
+			</isNotEmpty>
+
+		</dynamic>
+	</select>
+	<!--删除菜单信息 -->
+	<delete id="menuDelete" parameterClass="String">
+		delete from ssi_auth_menu where menu_id= #menu_id#
+	</delete>
+	<!--删除资源信息 -->
+	<delete id="resourceDelete" parameterClass="String">
+		delete from ssi_auth_resource where resource_id= #resource_id#
+	</delete>
+	<!--添加单元信息 -->
+
+	<insert id="menuAdd" parameterClass="menu">
+
+		<![CDATA[
+	
+   insert into ssi_auth_menu ( menu_id, resource_id, name, description,parent_id,position,url)
+    values ( #menu_id#, #resource_id#, #name#, #description#,#parent_id#, #position#,#url#)
+
+		]]>
+	</insert>
+	<!--添加单元信息 -->
+
+	<insert id="resourceAdd" parameterClass="resource">
+
+		<![CDATA[
+	insert into ssi_auth_resource (resource_id, url,title)
+    values (#resource_id#,#url#,#title# )
+
+		]]>
+	</insert>
+	<!--根据菜单ID查询菜单信息记录 -->
+	<select id="findMenuByID" parameterClass="String"
+		resultClass="menu">
+		select t.menu_id,t.resource_id, t.name,
+		t.description,t.position,t.parent_id, t.url, case when (select
+		count(1) from ssi_auth_menu tt where tt.parent_id = t.menu_id
+		)>0 then 0 else 1 end leaf from ssi_auth_resource r,
+		ssi_auth_menu t where r.resource_id = t.resource_id and
+		t.menu_id=#menu_id# ORDER BY T.POSITION ASC
+	</select>
+	<!--根据资源ID查询资源信息记录 -->
+	<select id="findResourcByID" parameterClass="String"
+		resultClass="resource">
+
+		select resource_id, url, title, parent_id, description FROM
+		ssi_auth_resource where resource_id=#resource_id#
+	</select>
+	<!--修改资源信息 -->
+	<update id="resourceUpdate" parameterClass="resource">
+		update ssi_auth_resource set url = #url#, title = #title# where
+		resource_id = #resource_id#
+	</update>
+	<!--修改菜单信息 -->
+	<update id="menuUpdate" parameterClass="menu">
+
+		update ssi_auth_menu set menu_id = #menu_id#, resource_id =
+		#resource_id# , name = #name# , description = #description# ,
+		parent_id = #parent_id# ,position = #position# ,url = #url#
+		where menu_id = #menu_id#
+	</update>
+
+	<!--添加账户信息 -->
+
+	<insert id="accountAdd" parameterClass="account">
+
+		<![CDATA[
+	
+    insert into ssi_org_account (account_id, user_id, username, password,description,registe_date,expired_date,enabled,locked)
+     values (#account_id#,#user_id#, #username#,#password#, #description#,#register_date#,#expired_date#,#enabled#,#locked#)
+   
+		]]>
+	</insert>
+	<!--添加用户信息 -->
+
+	<insert id="userAdd" parameterClass="user">
+
+		<![CDATA[
+	
+    insert into ssi_org_user (user_id, full_name,description, sex)
+     values (#userID#, #fullName#,#description#, #sex#)
+
+		]]>
+	</insert>
+
+	<!--根据用户ID查询用户信息记录 -->
+	<select id="findUserByID" parameterClass="String"
+		resultClass="user">
+		select user_id, full_name as fullName, sex, description from
+		ssi_org_user where user_id =#userID#
+	</select>
+	<!--根据用户ID查询单位记录 -->
+	<select id="findUnitListOfUser" parameterClass="user"
+		resultClass="unit">
+		select u.unit_id,u.unit_name, u.parent_id, u.description from
+		ssi_org_unit u, ssi_org_m_user_unit m where u.unit_id =
+		m.unit_id and m.user_id = #userID#
+	</select>
+	<!--根据用户ID查询角色信息记录 -->
+	<select id="findRoleListOfUser" parameterClass="user"
+		resultClass="role">
+
+		select r.role_id, r.role_name, parent_id, r.description from
+		ssi_auth_role r, ssi_auth_m_user_role m where r.role_id =
+		m.role_id and m.user_id = #userID#
+
+	</select>
+	<!--根据用户USERID查询角色信息记录 -->
+	<select id="queryRoleListOfUser" parameterClass="user"
+		resultClass="role">
+
+		select r.role_id, r.role_name, parent_id, r.description from
+		ssi_auth_role r, ssi_auth_m_user_role m where r.role_id =
+		m.role_id and m.user_id = #userID#
+
+	</select>
+
+	<!--根据用户ID查询账户记录 -->
+	<select id="findAccountByuserid" parameterClass="String"
+		resultClass="account">
+		select account_id, user_id, username, password
+		,expired_date,locked from ssi_org_account where user_id
+		=#userID#
+	</select>
+	<!--根据用户ID删除角色信息 -->
+	<delete id="USERROLeDelete" parameterClass="String">
+		delete from ssi_auth_m_user_role where user_id = #userID#
+
+	</delete>
+	<!--根据用户ID删除单位信息 -->
+	<delete id="UserUnitDelete" parameterClass="String">
+
+		delete from ssi_org_m_user_unit where user_id = #userID#
+	</delete>
+
+	<!--修改用户信息 -->
+	<update id="userUpdate" parameterClass="user">
+		update ssi_org_user set full_name =#fullName#, sex= #sex#,
+		description = #description# where user_id = #userID#
+	</update>
+	<!--修改账户信息 -->
+	<update id="accountUpdate" parameterClass="account">
+
+		update ssi_org_account set username=#username#, password
+		=#password#, description = #description#,locked=#locked#,expired_date=#expired_date# WHERE account_id
+		=#account_id#
+	</update>
+	<!--添加用户角色信息 -->
+
+	<insert id="insertUserRole1" parameterClass="user">
+
+		<![CDATA[
+      insert into ssi_auth_m_user_role (user_id, role_id) 
+     values (#userID#,#roleID#)
+
+		]]>
+	</insert>
+	<!--添加用户单位信息 -->
+
+	<insert id="insertUserUnit1" parameterClass="user">
+
+		<![CDATA[
+     insert into ssi_org_m_user_unit (user_id, unit_id) 
+    values (#userID#,#unitID#)
+
+		]]>
+	</insert>
+
+	<!-- 查找角色信息 -->
+	<select id="queryRoleList2" parameterClass="role"
+		resultClass="role">
+		select role_id , parent_id, role_name, description from
+		ssi_auth_role where 1=1
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="unit_id">
+				unit_id=#unit_id#
+			</isNotEmpty>
+
+		</dynamic>
+	</select>
+	<!--根据用户ID查询账户记录 -->
+	<select id="queryAccountByUsername" parameterClass="String"
+		resultClass="account">
+		select account_id, user_id, username, password, enabled,
+		registe_date, expired_date, description, locked from
+		ssi_org_account where username =#username#
+	</select>
+	<!--根据用户userID查询用户信息记录 -->
+	<select id="findUserByuserID" parameterClass="String"
+		resultClass="user">
+		select user_id as userID, full_name as fullName, sex,
+		description from ssi_org_user where user_id =#userID#
+	</select>
+	<!--根据用户userID查询用户性别记录 -->
+	<select id="findUserXbList" parameterClass="String"
+		resultClass="String">
+		select  sex
+		from ssi_org_user where user_id =#userID#
+	</select>
+	
+	<select id="findAllAccount" resultClass="account">
+		select * from ssi_org_account 
+	</select>
+	
+	<!--根据用户userID查询用户锁定记录 -->
+	<select id="findUserCzList" parameterClass="String"
+		resultClass="String">
+		select locked
+		from ssi_org_account where user_id =#userID#
+	</select>
+	<!--根据用户id查找所有单元信息 -->
+	<select id="queryUnitListOfUser" parameterClass="user"
+		resultClass="unit">
+		select u.unit_id ,u.unit_name ,u.description ,u.parent_id ,u.xzqh from
+		ssi_org_unit u , ssi_org_m_user_unit m where u.unit_id
+		=m.unit_id and m.user_id=#userID#
+	</select>
+	<!--根据用户id查找所有单元信息 -->
+	<select id="queryResourceList" resultClass="resource">
+		select resource_id,url,title,parent_id,is_leaf,description from
+		ssi_auth_resource
+	</select>
+	<!--根据资源id查找所有单元信息 -->
+	<select id="queryRoleListOfResource" parameterClass="resource"
+		resultClass="role">
+		select r.role_id,r.role_name,r.parent_id,r.description from
+		ssi_auth_role r,ssi_auth_m_role_resource rr where r.role_id=
+		rr.role_id and rr.resource_id =#resource_id#
+	</select>
+	<!--根据rolemenu查找所有menu信息 -->
+	<select id="queryMenuListChecked" parameterClass="role"
+		resultClass="menu">
+		select c.menu_id, c. resource_id,c. name,c. description,c.
+		parent_id,c. position from ssi_auth_menu c,ssi_auth_m_menu_role
+		a where a.menu_id =c.menu_id and c.parent_id is null
+
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="role_id">
+				a.role_id=#role_id#
+			</isNotEmpty>
+
+		</dynamic>
+	</select>
+
+	<!--根据rolemenu查找所有menu信息 -->
+	<select id="queryMenuListChecked1" parameterClass="String"
+		resultClass="menu">
+		select distinct c.MENU_ID,c.resource_id,c.name,c.description,c.parent_id,c.position,
+		CASE WHEN (SELECT COUNT(1) from SSI_AUTH_MENU a WHERE
+		a.PARENT_ID = c.MENU_ID )>0 THEN 0 ELSE 1 END LEAF , $aa$
+
+
+	</select>
+
+
+	<!--添加角色信息 -->
+
+	<insert id="roleAdd" parameterClass="role">
+
+		<![CDATA[
+    insert into ssi_auth_role(role_id, role_name, is_leaf, description,unit_id)
+      values (#role_id#, #role_name#, #leaf#, #description#,#unit_id#)
+
+		]]>
+	</insert>
+	<!--添加角色资源信息 -->
+
+	<insert id="insertPrivilege" parameterClass="roleRescource">
+
+		<![CDATA[
+ insert into SSI_AUTH_M_ROLE_RESOURCE (role_id, resource_id) 
+  values (#role_id#,#rescource_id#)
+		]]>
+	</insert>
+	<!--删除角色信息 -->
+	<delete id="roleDelete" parameterClass="String">
+		delete from ssi_auth_role where role_id=#role_id#
+	</delete>
+	<!--根据角色信息删除资源信息 -->
+	<delete id="deleteRoleResourceMapping" parameterClass="String">
+		delete from ssi_auth_m_role_resource where role_id=#role_id#
+	</delete>
+	<!--根据角色信息删除用户信息 -->
+	<delete id="deleteRoleUserMapping" parameterClass="String">
+		delete from ssi_auth_m_user_role where role_id=#role_id#
+	</delete>
+	<!--根据角色信息删除资源信息信息 -->
+	<delete id="deletePrivilegeOfRole" parameterClass="String">
+		delete from ssi_auth_m_menu_role where role_id=#role_id#
+
+	</delete>
+	<!--添加角色菜单信息 -->
+	<insert id="insertRoleMenuMapping" parameterClass="roleMenu">
+		<![CDATA[
+   
+ insert into ssi_auth_m_menu_role m (role_id,menu_id) 
+ values (#role_id#,#menu_id#)
+		]]>
+	</insert>
+	<!--添加角色资源信息 -->
+	<insert id="insertPrivilege1111" parameterClass="roleRescource">
+		<![CDATA[
+ insert into SSI_AUTH_M_ROLE_RESOURCE (role_id, resource_id) 
+  values (#role_id#,#rescource_id#)
+		]]>
+	</insert>
+
+	<!--删除角色菜单信息 -->
+	<delete id="deleteRoleMenuMapping" parameterClass="roleMenu">
+		delete from ssi_auth_m_menu_role where menu_id=#menu_id# and
+		role_id=#role_id#
+	</delete>
+	<!--删除角色菜单信息 -->
+	<delete id="deletePrivilege" parameterClass="roleRescource">
+		delete from ssi_auth_m_role_resource where role_id=#role_id# and
+		resource_id=#rescource_id#
+	</delete>
+
+	<!--根据UserMenu查找所有菜单树信息 -->
+	<select id="queryAccessibleMenuListOfUser" parameterClass="String"
+		resultClass="menu">
+		SELECT distinct T.MENU_ID, T.RESOURCE_ID, T.NAME, T.DESCRIPTION,
+		T.POSITION, T.PARENT_ID, T.URL, CASE WHEN (SELECT COUNT(1) from
+		SSI_AUTH_MENU TT WHERE TT.PARENT_ID = T.MENU_ID) > 0 THEN 0 ELSE
+		1 END LEAF FROM SSI_AUTH_MENU T, SSI_AUTH_M_MENU_ROLE M,
+		SSI_AUTH_M_USER_ROLE U WHERE T.MENU_ID = M.MENU_ID AND M.ROLE_ID
+		= U.ROLE_ID AND T.PARENT_ID is null AND U.USER_ID =#userID#
+		ORDER BY T.POSITION ASC
+	</select>
+	<select id="queryMenuList" parameterClass="String"
+		resultClass="menu">
+		$aa$
+	</select>
+	<!-- 获取所有子节点 -->
+	<select id="queryAll" parameterClass="String" resultClass="unit">
+		select unit_id,xzqh,unit_name,parent_id,is_leaf,orderid,description from ssi_org_unit start with parent_id =#parent_id# 
+		connect by prior unit_id=parent_id
+	</select>
+	
+	<select id="queryAllParantName" parameterClass="String" resultClass="unit">
+		select a.unit_id,a.xzqh,a.unit_name,a.parent_id,a.is_leaf,a.orderid,a.description,b.unit_name as parent_name from ssi_org_unit a ,ssi_org_unit b where a.parent_id = b.unit_id start with a.parent_id =#parent_id# 
+		connect by prior a.unit_id=a.parent_id 
+	</select>
+	
+	<select id="queryUserLog" parameterClass="userLog" resultClass="userLog">
+		Select to_char(OPERATE_DATE, 'yyyy-MM-dd HH24:mi:ss') as OPERATE_DATE,OPERATE_USER,OPERATE_DEPT,OPERATE_OBJECT,OPERATE_INFO,OPETATE_CLASS
+			From SSI_USER_LOG Where 1=1
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="OPERATE_DATE">
+				OPERATE_DATE=#OPERATE_DATE#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_USER">
+				OPERATE_USER=#OPERATE_USER#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_DEPT">
+				OPERATE_DEPT like '%'||#OPERATE_DEPT#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_OBJECT">
+				OPERATE_OBJECT like '%'||#OPERATE_OBJECT#||'%'
+			</isNotEmpty>
+		</dynamic>
+			order by operate_date desc
+	</select>
+	<select id="queryUserLogCount" parameterClass="userLog" resultClass="int">
+		Select count(*)
+			From SSI_USER_LOG Where 1=1
+		<dynamic>
+
+			<isNotEmpty prepend="and" property="OPERATE_DATE">
+				OPERATE_DATE=#OPERATE_DATE#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_USER">
+				OPERATE_USER=#OPERATE_USER#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_DEPT">
+				OPERATE_DEPT like '%'||#OPERATE_DEPT#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="OPERATE_OBJECT">
+				OPERATE_OBJECT like '%'||#OPERATE_OBJECT#||'%'
+			</isNotEmpty>
+		</dynamic>
+			
+	</select>
+	<!--删除系統用户日誌 -->
+	<delete id="delUserLog" parameterClass="String">
+		delete from SSI_USER_LOG where OPERATE_DATE= to_date( #OPERATE_DATE#,'yyyy-mm-dd hh24:mi:ss')
+	</delete>
+	<!-- 注册按钮 -->
+	<insert id="buttonAdd" parameterClass="button">
+
+		<![CDATA[
+	insert into ssi_auth_button  (button_name,menu_id,description,button_view_id) 
+    values(#button_name#,#menu_id#,#description#,#button_view_id#)
+		]]>
+	</insert>
+	
+	<select id="queryButtonID" parameterClass="String" resultClass="button">
+		Select button_view_id,menu_id,button_name 
+			From ssi_auth_button Where 1=1
+			<dynamic>
+			<isNotEmpty prepend="and" property="button_view_id">
+				button_view_id=#button_view_id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="menu_id">
+				menu_id=#menu_id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="button_name">
+				button_name =#button_name#
+			</isNotEmpty>
+		</dynamic>
+			
+	</select>
+	
+		<select id="queryRoleButton" parameterClass="String" resultClass="String">
+		Select button_view_id
+			From ssi_auth_m_button_role Where role_id=#role_id#
+			
+	</select>
+	
+	<select id="queryButtonListChecked" parameterClass="button" resultClass="button">
+	select distinct b.*,case when(select count(1) from ssi_auth_m_button_role a where a.button_view_id=b.button_view_id
+		 and a.role_id=#role_id#)>0 then 1 else 0 end checked
+		from ssi_auth_button b  where b.menu_id=#menu_id#
+	</select>
+	
+	<insert id="insertRoleButton" parameterClass="button">
+
+		<![CDATA[
+	insert into ssi_auth_m_button_role  (role_id,button_view_id) 
+    values(#role_id#,#button_view_id#)
+		]]>
+	</insert>
+		<!--删除系統用户日誌 -->
+	<delete id="deleteRoleButton" parameterClass="button">
+		delete from ssi_auth_m_button_role where role_id=#role_id# and
+		button_view_id=#button_view_id#
+	</delete>
+</sqlMap>

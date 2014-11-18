@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+		
+	<typeAlias alias="law" type="com.kingtone.jw.biz.manage.domain.Law" />
+		
+	<select id="findLawList" parameterClass="law" resultClass="law">
+		select LAW_ID,LAW_CODE,LAW_NAME,ADMINISTRATION,IRREGULARITYACTION,LAW_TYPE 
+		from JW_LAW where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="LAW_CODE">
+				LAW_CODE like '%'||#LAW_CODE#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="LAW_NAME">
+				LAW_NAME like '%'||#LAW_NAME#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="LAW_TYPE">
+				LAW_TYPE like '%'||#LAW_TYPE#||'%'
+			</isNotEmpty>
+		</dynamic>
+			order by LAW_CODE asc
+	</select>
+	
+	<select id="findLawListCount" parameterClass="law" resultClass="int">
+		select count(*)
+		from JW_LAW where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="LAW_CODE">
+				LAW_CODE like '%'||#LAW_CODE#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="LAW_NAME">
+				LAW_NAME like '%'||#LAW_NAME#||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="LAW_TYPE">
+				LAW_TYPE like '%'||#LAW_TYPE#||'%'
+			</isNotEmpty>
+		</dynamic>
+			
+	</select>
+	
+	<!-- 法律法规查詢-->
+	<select id="findLawByLawID" parameterClass="String" resultClass="law">
+		select DISTINCT LAW_ID,LAW_CODE,LAW_NAME,ADMINISTRATION,IRREGULARITYACTION,LAW_TYPE 
+		 from JW_LAW  where LAW_ID=$id$
+	</select>
+	
+	<!-- 通訊錄查詢統計 -->
+	<select id="findLawByLawCode" parameterClass="String" resultClass="int">
+		select count(*) from JW_LAW where LAW_CODE= #id#		
+	</select>
+	
+	<!-- 刪除法律法规 -->
+	<delete id="delLawByLawID" parameterClass="String">
+		delete from JW_LAW where LAW_ID= #id#
+	</delete>
+	
+	<!-- 法律法规插入 -->
+	<insert id="insertLaw" parameterClass="law">
+		<![CDATA[
+			insert into JW_LAW(LAW_ID,LAW_CODE,LAW_NAME,ADMINISTRATION,IRREGULARITYACTION,LAW_TYPE)
+			 values (get_law_id.nextval,#LAW_CODE#,#LAW_NAME#,#ADMINISTRATION#,#IRREGULARITYACTION#,#LAW_TYPE#)
+		]]>
+	</insert>
+	
+	<update id="updateLaw" parameterClass="law">
+	
+		update JW_LAW set LAW_CODE =#LAW_CODE#,LAW_NAME=#LAW_NAME#,ADMINISTRATION=#ADMINISTRATION#,
+			IRREGULARITYACTION=#IRREGULARITYACTION#,LAW_TYPE=#LAW_TYPE#
+		where LAW_ID = $LAW_ID$
+	</update>
+</sqlMap>

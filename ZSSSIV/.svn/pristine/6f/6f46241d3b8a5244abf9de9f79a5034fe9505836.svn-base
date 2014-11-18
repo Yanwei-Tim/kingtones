@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" 
+	"D:\projects\neusipo_v2.0\platform\struts-2.0.dtd">
+<struts>
+<!-- 	<package name="controller" extends="struts-default" namespace="/controller"> -->
+<!-- 		<action name="userPNAC" class="userPNAC"> -->
+<!-- 		</action> -->
+<!-- 		<!--  action name="sessionPNAC" class="sessionPNAC"> -->
+<!-- 		</action> -->
+<!-- 		<action name="noticePNAC" class="NoticePNAC"> -->
+<!-- 		</action--> -->
+<!-- 	</package> -->
+</struts>

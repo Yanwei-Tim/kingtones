@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	
+	<bean id="gpsDAO"
+		class="com.kingtone.jw.service.dao.impl.GpsDAOImpl"
+		parent="confDaoProxy">
+	</bean>
+	<bean id="tztgListDAO" 
+		class="com.kingtone.jw.service.dao.impl.TztgListDAOImpl" 
+		parent="confDaoProxy" >
+	</bean>
+	<bean id="logDAO"
+		class="com.kingtone.jw.service.dao.impl.LogDAOImpl"
+		parent="confDaoProxy" >
+	</bean>
+	<!-- 同步数据DAO -->
+	<bean id="synchDAO"
+		class="com.kingtone.jw.service.dao.impl.SynchDAOImpl"
+		parent="confDaoProxy" >
+	</bean>
+	<!-- 附件相关操作DAO -->
+	<bean id="attachDAO"
+		class="com.kingtone.jw.service.dao.impl.AttachDAOImpl"
+		parent="confDaoProxy" >
+	</bean>
+	
+	<!-- 配置DAO采用固定数据源 -->
+	<bean id="confDAO"
+		class="com.kingtone.jw.service.dao.impl.ConfDAOImpl"
+		parent="confDaoProxy">
+	</bean>
+	
+	<bean id="platDAO"
+		class="com.kingtone.jw.service.dao.impl.PlatDAOImpl"
+		parent="platDaoProxy">
+	</bean>
+	<bean id="oaPermissionDAO"
+		class="com.kingtone.jw.service.dao.impl.OaPermissionDAOImpl"
+		parent="oaDaoProxy">
+	</bean>
+	<!-- 业务DAO采用动态数据源 -->
+	<bean id="bizDAO" class="com.kingtone.jw.service.dao.impl.BizDAOImpl">  
+   		<property name="dataSource" ref="multiDS"/>  
+	</bean> 
+	<bean id="multiDS" class="com.kingtone.ssi.multids.CustomerRoutingDataSource">  
+	    <property name="targetDataSources">  
+	        <map key-type="com.kingtone.ssi.multids.CustomerType">  
+	        	<!-- 此处配置多个业务数据源 -->
+	        	<!-- 预留数据源名称分别为：bizDS_1,bizDS_2,bizDS_3,....bizDS_10,-->
+	        	<entry key="confDS" value-ref="confDataSource"/>  
+	         	<entry key="bizDS" value-ref="bizDataSource"/>  
+	         	<entry key="bizDS_1" value-ref="confDataSource"/>  	         	
+	      	</map>  
+	   	</property>  
+	</bean>
+	<!-- add by 陈萧如 2012-01-04 start -->
+	<!-- 登录验证信息DAO -->
+	<bean id="loginDAO"
+		class="com.kingtone.jw.service.dao.impl.LoginDAOImpl"
+		parent="confDaoProxy">
+	</bean>
+	<!-- add by 陈萧如 2012-01-04 end -->
+	
+	<!-- 通讯录DAO add by yangzm -->
+	<bean id="contactsDAO"
+		class="com.kingtone.jw.service.dao.impl.ContactsDAOImpl">
+		<property name="dataSource" ref="multiDS"/>
+	</bean>
+		
+</beans>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" 
+	"D:\projects\neusipo_v2.0\platform\struts-2.0.dtd">
+<struts>
+	<package name="biz.service" extends="struts-default" namespace="/biz">
+		<action name="serviceAC" class="serviceAC">
+		<result name="importImage_fail">/biz/service/image_import.jsp</result>
+		<result name="importImage_success">/biz/service/image_import.jsp</result>
+		<result name="guide_index">/biz/service/guide_mgr.jsp</result>
+		
+		</action>
+		<action name="sysCodeListAC" class="sysCodeListAC">
+		</action>
+		<action name="sysConfMgAC" class="sysConfMgAC">
+		</action>
+		
+	</package>
+</struts>

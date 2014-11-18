@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" 
+	"D:\projects\neusipo_v2.0\platform\struts-2.0.dtd">
+<struts>
+
+	<package name="auth" extends="struts-default" namespace="/platform">
+		<action name="menuAC" class="menuAC">
+			<result name="success">framework/left.jsp</result>
+		</action>
+		<action name="roleAC" class="roleAC">
+		</action>
+		<action name="buttonAC" class="buttonAC">
+		</action>
+	</package>
+	
+	<package name="codelist" extends="struts-default" namespace="/platform">
+		<action name="codeListAC" class="codeListAC">
+		</action>
+	</package>
+	
+	<package name="login" extends="struts-default" namespace="/platform">
+		<action name="login_point">
+			<result>login/login.jsp</result>
+		</action>
+		<action name="logout">
+			<result>login/login.jsp</result>
+		</action>
+		
+		<action name="login" class="com.kingtone.jw.platform.login.LoginAC">
+			<result name="success">framework/framework.jsp</result>
+			<result name="logout">login/login.jsp</result>
+			<result name="error">login/login.jsp</result>
+		</action>
+	</package>
+	
+	<package name="org" extends="struts-default" namespace="/platform">
+		<action name="unitAC" class="unitAC">
+			<result name="unit_mgr_list">org/unit_mgr_list.jsp</result>
+			<result name="success">/success.jsp</result>
+		<result name="error">/error.jsp</result>
+		</action>
+		<action name="userAC" class="userAC">
+		<result name="success">/success.jsp</result>
+		<result name="error">/error.jsp</result>
+		</action>
+		<action name="logAC" class="logAC">
+			<result name="userlog_mgr_list">org/userlog_mgr_list.jsp</result>
+		</action>	
+	</package>
+	
+	<!-- 警情yulipeng -->
+	<package name="jq" extends="struts-default" namespace="/jq">
+		<action name="psAC" class="psAC">
+			<result name="unit_mgr_list">jq/unit_mgr_list.jsp</result>
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>
+		</action>
+	</package>
+	<package name="jquser" extends="struts-default" namespace="/jq">
+		<action name="psUserAC" class="psUserAC">
+			<result name="user_mgr_list">jq/user_mgr_list.jsp</result>
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>
+		</action>
+	</package>
+	<package name="jqcount" extends="struts-default" namespace="/jq">
+		<action name="psUCAC" class="psUCAC">
+			<result name="user_count_list">jq/user_count_list.jsp</result>
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>
+		</action>
+	</package>
+	<package name="jqunitcount" extends="struts-default" namespace="/jq">
+		<action name="psUnitCAC" class="psUnitCAC">
+			<result name="unit_count_list">jq/unit_count_list.jsp</result>
+			<result name="success">/success.jsp</result>
+			<result name="error">/error.jsp</result>
+		</action>
+	</package>
+	<!-- add by hanliqiang use for dpn -->
+	
+	<package name="dpn" extends="struts-default" namespace="/platform">
+		<action name="jwUserPNAC" class="jwUserPNAC"></action>
+	</package>
+</struts>

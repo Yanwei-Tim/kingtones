@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	<!-- 平台数据源 -->
+	<bean id="platformDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="maxActive" value="5000" />
+		<property name="maxIdle" value="10" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="1000" />
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@10.44.128.159:1521:oradb" />
+		<property name="username" value="jwt_nssi" />
+		<property name="password" value="jwt_nssi" />
+	</bean>
+	
+	<bean id="confDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<!--property name="maxActive" value="5000" />
+		<property name="maxIdle" value="0" /-->
+		<property name="validationQuery" value="select count(1) from dual"/>
+		<property name="testWhileIdle" value="true"/>
+		<property name="testOnReturn" value="true"/>
+		<property name="testOnBorrow" value="true"/>
+		<property name="minEvictableIdleTimeMillis" value="10000"/>
+		<property name="timeBetweenEvictionRunsMillis" value="10000"/>
+		<property name="maxActive" value="5000" />
+		<property name="maxIdle" value="10" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="1000" />	
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@10.44.128.159:1521:oradb" />
+		<property name="username" value="jwt_conf" />
+		<property name="password" value="jwt_conf" />
+	</bean>
+	
+	
+	<bean id="bizDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="validationQuery" value="select count(1) from dual"/>
+		<property name="testWhileIdle" value="true"/>
+		<property name="testOnReturn" value="true"/>
+		<property name="testOnBorrow" value="true"/>
+		<property name="minEvictableIdleTimeMillis" value="10000"/>
+		<property name="timeBetweenEvictionRunsMillis" value="10000"/>
+		<property name="maxActive" value="5000" />
+		<property name="maxIdle" value="10" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="100" />	
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@10.44.128.159:1521:oradb" />
+		<property name="username" value="jwt_res" />
+		<property name="password" value="jwt_res" />
+	</bean>
+	<bean id="oaDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<!--property name="maxActive" value="5000" />
+		<property name="maxIdle" value="0" /-->
+		<property name="validationQuery" value="select count(1) from dual"/>
+		<property name="testWhileIdle" value="true"/>
+		<property name="testOnReturn" value="true"/>
+		<property name="testOnBorrow" value="true"/>
+		<property name="minEvictableIdleTimeMillis" value="10000"/>
+		<property name="timeBetweenEvictionRunsMillis" value="10000"/>
+		<property name="maxActive" value="5000" />
+		<property name="maxIdle" value="10" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="100" />	
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<!--property name="url" value="jdbc:oracle:thin:@222.90.232.195:1521:oradb" />
+		<property name="username" value="dpsiid" />
+		<property name="password" value="dpsiid" /-->
+		<property name="url" value="jdbc:oracle:thin:@10.44.129.200:1521:orcl" />
+		<property name="username" value="mobileOA" />
+		<property name="password" value="mboa" />
+	</bean>
+</beans>
