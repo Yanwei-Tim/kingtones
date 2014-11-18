@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ApkList>
-	<Apk>
-		<versionCode>1.2</versionCode>
-		<filePath>
-			http://192.168.43.152:8080/ZSSSIV/versionfile/xajw.apk
-		</filePath>
-	</Apk>
-</ApkList>
